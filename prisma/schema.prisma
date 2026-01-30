@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum Role {
+  USER
+  ADMIN
+  EDITOR
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum DailySaleStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id        String   @id @default(uuid())
+  username  String?  @unique  // For Admin/Editor login
+  password  String?           // Hashed password
+  phone     String?  @unique  // Optional for staff, required for customers
+  email     String?           // Optional
+  name      String?
+  role      Role     @default(USER)
+  orders    Order[]
+  
+  // Workflows
+  createdSales  DailySale[] @relation("CreatedBy")
+  approvedSales DailySale[] @relation("ApprovedBy")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  name        String
+  description String?
+  icon        String?   // Path to category image
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  slug          String      @unique
+  name          String
+  description   String?
+  image         String      // Main image path
+  images        String[]    // Gallery images
+  grossWeight   String      // e.g., "500g"
+  netWeight     String      // e.g., "450g"
+  price         Int         // Base Price in paisa
+  originalPrice Int?        // Base Discount Price
+  stock         Int         @default(0)  // Current Stock
+  defaultStock  Int         @default(0)  // Stock to reset to daily
+  inStock       Boolean     @default(true)
+  pieces        String?
+  serves        String?
+  sourcing      String?
+  cutType       String?
+  texture       String?
+  deliveryTime  String?
+  categoryId    String
+  category      Category    @relation(fields: [categoryId], references: [id])
+  orderItems    OrderItem[]
+  dailySaleItems DailySaleItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([categoryId])
+}
+
+model DailySale {
+  id            String          @id @default(uuid())
+  date          DateTime        @unique // Only one sale config per day
+  status        DailySaleStatus @default(DRAFT)
+  items         DailySaleItem[]
+  
+  createdById   String
+  createdBy     User            @relation("CreatedBy", fields: [createdById], references: [id])
+  
+  approvedById  String?
+  approvedBy    User?           @relation("ApprovedBy", fields: [approvedById], references: [id])
+  
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([date])
+}
+
+model DailySaleItem {
+  id          String    @id @default(uuid())
+  dailySaleId String
+  dailySale   DailySale @relation(fields: [dailySaleId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  
+  price       Int       // Override Price for this day
+  stock       Int       // Stock available for this day
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([dailySaleId, productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  status          OrderStatus @default(PENDING)
+  subtotal        Int
+  deliveryFee     Int         @default(0)
+  total           Int
+  
+  // Delivery Info
+  deliveryName    String
+  deliveryPhone   String
+  deliveryAddress String
+  deliveryCity    String
+  deliveryPincode String
+  
+  // Payment
+  paymentId       String?
+  paymentStatus   String?     // PENDING, PAID, FAILED
+  razorpayOrderId String?     @unique // Link to Razorpay Order
+  
+  idempotencyKey  String?     @unique
+  
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  quantity    Int
+  priceAtTime Int     // Snapshot of price when ordered
+  
+  @@index([orderId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+}

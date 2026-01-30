@@ -1,0 +1,224 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-brand: var(--brand);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-soft: var(--brand-soft);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.75rem;
+  /* Ocean Theme */
+  --background: #F8FBFF;
+  /* Clear Water White */
+  --foreground: #002244;
+  /* Deep Ocean Text */
+
+  --card: #FFFFFF;
+  --card-foreground: #002244;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #002244;
+
+  --primary: #003366;
+  /* Deep Ocean Blue */
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #008080;
+  /* Caribbean Teal */
+  --secondary-foreground: #FFFFFF;
+
+  --muted: #E0F2F1;
+  --muted-foreground: #546E7A;
+
+  --accent: #FF7F50;
+  /* Coral */
+  --accent-foreground: #FFFFFF;
+
+  --destructive: #ef4444;
+  /* Standard Red */
+  --border: #B0C4DE;
+  /* Light Steel Blue */
+  --input: #B0C4DE;
+  --ring: #008080;
+
+  --chart-1: #003366;
+  --chart-2: #008080;
+  --chart-3: #FF7F50;
+  --chart-4: #48C9B0;
+  --chart-5: #FFD700;
+
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #002244;
+  --sidebar-primary: #003366;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E0F2F1;
+  --sidebar-accent-foreground: #003366;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #008080;
+
+  /* Typography Scale */
+  --font-size-xs: 0.625rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.875rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Semantic Colors */
+  --success: #108942;
+  --success-light: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  --error: #EF4444;
+  --error-light: #FEE2E2;
+  --info: #3B82F6;
+  --info-light: #DBEAFE;
+
+  /* Product-Specific */
+  --price: #108942;
+  --discount-badge: #FF6B35;
+  --offer-text: #108942;
+  --stock-out: #94A3B8;
+
+  /* UI States */
+  --skeleton: #E2E8F0;
+  --hover: rgba(0, 0, 0, 0.04);
+  --focus-ring: var(--primary);
+}
+
+.dark {
+  --background: #000B14;
+  /* Midnight Abyssal */
+  --foreground: #F1F5F9;
+
+  --card: #001524;
+  --card-foreground: #F1F5F9;
+
+  --popover: #001524;
+  --popover-foreground: #F1F5F9;
+
+  --primary: #4D94FF;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #00CCCC;
+  --secondary-foreground: #000B14;
+
+  --muted: #002233;
+  --muted-foreground: #94A3B8;
+
+  --accent: #FF7F50;
+  --accent-foreground: #FFFFFF;
+
+  --destructive: #EF4444;
+  --border: #001F33;
+  --input: #001F33;
+  --ring: #4D94FF;
+
+  --chart-1: #4D94FF;
+  --chart-2: #00CCCC;
+  --chart-3: #FF7F50;
+  --chart-4: #48C9B0;
+  --chart-5: #FFD700;
+
+  --sidebar: #001524;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #4D94FF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #002233;
+  --sidebar-accent-foreground: #F1F5F9;
+  --sidebar-border: #001F33;
+  --sidebar-ring: #4D94FF;
+
+  /* Dark Mode Semantic Overrides */
+  --success-light: #064E3B;
+  --warning-light: #78350F;
+  --error-light: #7F1D1D;
+  --info-light: #1E40AF;
+
+  /* Dark Mode UI States */
+  --skeleton: #334155;
+  --hover: rgba(255, 255, 255, 0.06);
+}
+
+@layer utilities {
+  .ocean-mesh {
+    background-color: #F8FBFF;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(224, 242, 254, 0.5) 0, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(240, 249, 255, 0.5) 0, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(224, 247, 250, 0.3) 0, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(240, 253, 250, 0.3) 0, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .dark .ocean-mesh {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(at 0% 0%, rgba(0, 51, 102, 0.4) 0, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(0, 31, 64, 0.4) 0, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(0, 77, 153, 0.2) 0, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(0, 77, 153, 0.2) 0, transparent 50%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
