@@ -147,6 +147,7 @@ model Order {
   paymentId       String?
   paymentStatus   String?     // PENDING, PAID, FAILED
   razorpayOrderId String?     @unique // Link to Razorpay Order
+  invoiceUrl      String?     // R2 URL for PDF invoice
   
   idempotencyKey  String?     @unique
   

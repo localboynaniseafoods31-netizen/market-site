@@ -6,13 +6,13 @@ import { notFound } from "next/navigation";
 export const dynamic = 'force-dynamic';
 
 interface InvoicePageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function InvoicePage({ params }: InvoicePageProps) {
-    const { id } = params;
+    const { id } = await params;
 
     const order = await prisma.order.findUnique({
         where: { id },

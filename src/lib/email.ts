@@ -24,10 +24,17 @@ interface OrderEmailProps {
     deliveryFee: number;
     subtotal: number;
     date: Date;
+    invoiceUrl?: string;
 }
 
 export const sendOrderConfirmation = async (order: OrderEmailProps, email: string) => {
     // Basic HTML Template for Invoice
+    const invoiceButton = order.invoiceUrl
+        ? `<div style="text-align: center; margin: 20px 0;">
+               <a href="${order.invoiceUrl}" style="display: inline-block; background: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">📄 Download Invoice</a>
+           </div>`
+        : '';
+
     const html = `
     <!DOCTYPE html>
     <html>
@@ -54,6 +61,8 @@ export const sendOrderConfirmation = async (order: OrderEmailProps, email: strin
             
             <p>Hi ${order.customerName},</p>
             <p>Thank you for your order! We've received it and are getting it fresh for you.</p>
+            
+            ${invoiceButton}
             
             <div class="order-details">
                 <p><strong>Order Number:</strong> ${order.orderNumber}</p>
@@ -127,6 +136,8 @@ export const sendAdminNotification = async (order: OrderEmailProps) => {
             ${order.items.map(item => `<li>${item.quantity} x ${item.name}</li>`).join('')}
         </ul>
         <br/>
+        <p><strong>Invoice:</strong> <a href="${order.invoiceUrl || '#'}">Download PDF</a></p>
+        <br/>
         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin/orders">View in Admin Dashboard</a>
     `;
 
@@ -139,12 +150,23 @@ export const sendAdminNotification = async (order: OrderEmailProps) => {
             return;
         }
 
-        await transporter.sendMail({
-            from: '"Ocean Fresh System" <system@oceanfresh.com>',
-            to: process.env.ADMIN_EMAIL || 'admin@oceanfresh.com',
-            subject: `New Order: ${order.orderNumber}`,
-            html,
-        });
+        const adminEmails = (process.env.ADMIN_EMAIL || 'admin@oceanfresh.com')
+            .split(',')
+            .map(e => e.trim())
+            .filter(e => e.length > 0);
+
+        console.log(`📧 Sending Admin Notifications to: ${adminEmails.join(', ')}`);
+
+        // Send to all admins in parallel
+        await Promise.all(adminEmails.map(email =>
+            transporter.sendMail({
+                from: '"Ocean Fresh System" <system@oceanfresh.com>',
+                to: email,
+                subject: `New Order: ${order.orderNumber}`,
+                html,
+            }).catch(e => console.error(`❌ Failed to send to admin ${email}:`, e))
+        ));
+
     } catch (error) {
         console.error('❌ Failed to send admin notification:', error);
     }

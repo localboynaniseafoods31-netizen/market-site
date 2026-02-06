@@ -54,6 +54,8 @@ export default function CheckoutPage() {
     const [isOrderPlaced, setIsOrderPlaced] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
     const [lookupLoading, setLookupLoading] = useState(false);
+    const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
+
     const [isProcessing, setIsProcessing] = useState(false);
 
     const deliveryFee = cartTotal >= 500 ? 0 : 49;
@@ -109,7 +111,6 @@ export default function CheckoutPage() {
             setStep('confirm');
         }
     };
-
     const handlePayment = async () => {
         setIsProcessing(true);
 
@@ -194,7 +195,7 @@ export default function CheckoutPage() {
                         const verifyData = await verifyRes.json();
 
                         if (verifyData.success) {
-                            handleOrderSuccess(data.orderNumber);
+                            handleOrderSuccess(data.orderNumber, verifyData.invoiceUrl);
                         } else {
                             alert('Payment verification failed. Please contact support.');
                         }
@@ -228,7 +229,7 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleOrderSuccess = (orderNumber: string) => {
+    const handleOrderSuccess = (orderNumber: string, invoice?: string) => {
         // Clear Cart & Redux
         dispatch(createOrder({
             items: cartItems.map((item: any) => ({
@@ -250,6 +251,7 @@ export default function CheckoutPage() {
         dispatch(clearCart());
         setIsOrderPlaced(true);
         setOrderId(orderNumber);
+        if (invoice) setInvoiceUrl(invoice);
         setIsProcessing(false);
     };
 
@@ -284,6 +286,20 @@ export default function CheckoutPage() {
                         <p className="text-slate-500 mb-6">
                             Your order #{orderId} has been confirmed.
                         </p>
+
+                        {invoiceUrl && (
+                            <div className="mb-6">
+                                <a
+                                    href={invoiceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center px-4 py-2 bg-sky-100 text-sky-700 rounded-lg hover:bg-sky-200 transition-colors font-medium text-sm"
+                                >
+                                    📄 Download Invoice
+                                </a>
+                            </div>
+                        )}
+
                         <div className="bg-muted/50 rounded-xl p-4 mb-6 text-left">
                             <p className="text-sm text-slate-500 mb-1">Delivering to</p>
                             <p className="font-medium text-slate-900">{name}</p>

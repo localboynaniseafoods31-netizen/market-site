@@ -68,13 +68,13 @@ export const sendWhatsAppMessage = async (to: string, templateName: string, comp
     }
 };
 
-export const sendOrderConfirmationWhatsApp = async (order: any) => {
+export const sendOrderConfirmationWhatsApp = async (order: any, invoiceUrl?: string) => {
     // Template: order_confirmation
     // Variables: {{1}} = Order Number, {{2}} = Total Amount, {{3}} = Invoice Link
 
-    // Construct Invoice Link
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oceanfresh.com'; // Fallback
-    const invoiceLink = `${appUrl}/orders/${order.id}/invoice`;
+    // Use provided URL or fallback to dynamic page
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oceanfresh.com';
+    const invoiceLink = invoiceUrl || `${appUrl}/orders/${order.id}/invoice`;
 
     const components = [
         {
@@ -82,12 +82,12 @@ export const sendOrderConfirmationWhatsApp = async (order: any) => {
             parameters: [
                 { type: 'text', text: order.orderNumber },
                 { type: 'text', text: `₹${(order.total / 100).toFixed(2)}` },
-                { type: 'text', text: invoiceLink } // Or use a button component if template supports it
+                { type: 'text', text: invoiceLink }
             ]
         }
     ];
 
-    await sendWhatsAppMessage(order.user.phone || order.deliveryPhone, 'order_confirmation', components);
+    await sendWhatsAppMessage(order.user?.phone || order.deliveryPhone, 'order_confirmation', components);
 };
 
 export const sendAdminAlertWhatsApp = async (order: any) => {
