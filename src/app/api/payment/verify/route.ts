@@ -85,7 +85,9 @@ export async function POST(req: NextRequest) {
         }
 
         // Fallback to dynamic invoice page if R2 upload failed
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const host = req.headers.get('host') || 'localhost:3000';
+        const protocol = req.headers.get('x-forwarded-proto') || 'http';
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
         const finalInvoiceUrl = invoiceUrl || `${appUrl}/orders/${order.id}/invoice`;
 
         // 5. Send Notifications (WhatsApp + Email)
