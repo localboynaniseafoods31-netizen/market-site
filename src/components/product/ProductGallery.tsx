@@ -1,5 +1,4 @@
-"use strict";
-"use client";
+'use client';
 
 import { useState } from "react";
 import Image from "next/image";
@@ -57,6 +56,7 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                                 isZoomed ? "scale-125" : "scale-100"
                             )}
                             priority
+                            unoptimized
                         />
                     </motion.div>
                 </AnimatePresence>
@@ -99,6 +99,7 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                                 alt={`Thumbnail ${idx + 1}`}
                                 fill
                                 className="object-cover p-1"
+                                unoptimized
                             />
                         </button>
                     ))}
@@ -107,3 +108,4 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
         </div>
     );
 }
+

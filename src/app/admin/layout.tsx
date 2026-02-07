@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth, signOut } from '@/lib/auth';
 import Link from 'next/link';
-import { Package, ShoppingBag, LayoutDashboard, Tags, LogOut, ChevronRight, TrendingUp, Calendar } from 'lucide-react';
+import { Package, ShoppingBag, LayoutDashboard, Tags, LogOut, ChevronRight, TrendingUp, Calendar, Image, Megaphone, Sparkles } from 'lucide-react';
 
 export default async function AdminLayout({
     children,
@@ -25,6 +25,9 @@ export default async function AdminLayout({
         { href: '/admin/orders', icon: ShoppingBag, label: 'Orders', mobileLabel: 'Orders' },
         { href: '/admin/products', icon: Package, label: 'Products', mobileLabel: 'Prods' },
         { href: '/admin/categories', icon: Tags, label: 'Categories', mobileLabel: 'Cats' },
+        { href: '/admin/deals', icon: Sparkles, label: 'Crazy Deals', mobileLabel: 'Deals' },
+        { href: '/admin/media', icon: Image, label: 'Media', mobileLabel: 'Media' },
+        { href: '/admin/banners', icon: Megaphone, label: 'Banners', mobileLabel: 'Banners' },
     ];
 
     return (

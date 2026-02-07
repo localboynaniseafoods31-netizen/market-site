@@ -64,6 +64,8 @@ export const createCategorySchema = z.object({
     slug: z.string().regex(/^[a-z0-9-]+$/),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
+    dealPercentage: z.number().int().min(0).max(100).optional().nullable(),
+    dealActive: z.boolean().optional(),
 });
 
 // ==================== Type Exports ====================

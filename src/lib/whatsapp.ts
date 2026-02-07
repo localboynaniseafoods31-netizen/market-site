@@ -1,52 +1,65 @@
-const WHATSAPP_API_URL = 'https://graph.facebook.com/v17.0'; // Or latest version
+/**
+ * WhatsApp Integration using Authkey.io API
+ * Docs: https://console.authkey.io
+ */
 
-interface WhatsAppMessage {
-    messaging_product: 'whatsapp';
-    to: string;
-    type: 'template';
-    template: {
-        name: string;
-        language: {
-            code: string;
-        };
-        components?: any[];
-    };
+const AUTHKEY_API_URL = 'https://console.authkey.io/restapi/requestjson.php';
+
+interface AuthkeyPayload {
+    country_code: string;
+    mobile: string;
+    wid: string;
+    type: 'text';
+    bodyValues: Record<string, string>;
 }
 
-export const sendWhatsAppMessage = async (to: string, templateName: string, components: any[] = []) => {
-    const token = process.env.WHATSAPP_ACCESS_TOKEN;
-    const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+/**
+ * Core function to send WhatsApp message via Authkey
+ */
+export const sendAuthkeyWhatsApp = async (
+    mobile: string,
+    templateId: string,
+    bodyValues: Record<string, string>
+) => {
+    const token = process.env.AUTHKEY_TOKEN;
+    const countryCode = process.env.AUTHKEY_COUNTRY_CODE || '91';
+    const mode = process.env.WHATSAPP_MODE || 'dev';
 
-    if (!token || !phoneId) {
-        console.log('⚠️ WhatsApp Credentials missing. Logging message instead.');
-        console.log('To:', to);
-        console.log('Template:', templateName);
-        console.log('Data:', JSON.stringify(components, null, 2));
-        return;
+    // Format phone: remove non-digits and strip country code if present
+    let formattedPhone = mobile.replace(/\D/g, '');
+    if (formattedPhone.startsWith('91') && formattedPhone.length > 10) {
+        formattedPhone = formattedPhone.slice(2); // Remove 91 prefix
+    }
+    if (formattedPhone.startsWith('+')) {
+        formattedPhone = formattedPhone.slice(1);
     }
 
-    // Format phone number: Remove non-digits, ensure 91 prefix
-    let formattedPhone = to.replace(/\D/g, '');
-    if (!formattedPhone.startsWith('91') && formattedPhone.length === 10) {
-        formattedPhone = '91' + formattedPhone;
-    }
-
-    const payload: WhatsAppMessage = {
-        messaging_product: 'whatsapp',
-        to: formattedPhone,
-        type: 'template',
-        template: {
-            name: templateName,
-            language: { code: 'en_US' }, // Or 'en' depending on your template setup
-            components
-        }
+    const payload: AuthkeyPayload = {
+        country_code: countryCode,
+        mobile: formattedPhone,
+        wid: templateId,
+        type: 'text',
+        bodyValues
     };
 
+    // DEV MODE: Just log the payload
+    if (mode === 'dev') {
+        console.log('📲 WhatsApp Payload (dev mode):');
+        console.log(JSON.stringify(payload, null, 2));
+        return { success: true, mode: 'dev', payload };
+    }
+
+    // PROD MODE: Actually send to Authkey
+    if (!token) {
+        console.error('❌ AUTHKEY_TOKEN not configured');
+        return { success: false, error: 'Missing AUTHKEY_TOKEN' };
+    }
+
     try {
-        const res = await fetch(`${WHATSAPP_API_URL}/${phoneId}/messages`, {
+        const res = await fetch(AUTHKEY_API_URL, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Basic ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
@@ -55,58 +68,75 @@ export const sendWhatsAppMessage = async (to: string, templateName: string, comp
         const data = await res.json();
 
         if (!res.ok) {
-            console.error('❌ WhatsApp API Error:', JSON.stringify(data, null, 2));
-            throw new Error(data.error?.message || 'WhatsApp API failed');
+            console.error('❌ Authkey API Error:', JSON.stringify(data, null, 2));
+            return { success: false, error: data };
         }
 
-        console.log('✅ WhatsApp Sent:', data.messages?.[0]?.id);
-        return data;
+        console.log('✅ WhatsApp Sent via Authkey:', data);
+        return { success: true, data };
 
     } catch (error) {
         console.error('❌ WhatsApp Send Failed:', error);
-        // Don't throw to avoid breaking the order flow, just log
+        return { success: false, error: String(error) };
     }
 };
 
+/**
+ * Send Order Confirmation to Customer
+ * Template variables:
+ *   {{1}} = Customer Name
+ *   {{2}} = Order Number
+ *   {{3}} = Amount (₹X)
+ *   {{4}} = Invoice filename (for CTA button URL)
+ */
 export const sendOrderConfirmationWhatsApp = async (order: any, invoiceUrl?: string) => {
-    // Template: order_confirmation
-    // Variables: {{1}} = Order Number, {{2}} = Total Amount, {{3}} = Invoice Link
+    const templateId = process.env.AUTHKEY_TEMPLATE_ID || '101';
+    const invoiceBaseUrl = process.env.INVOICE_R2_BASE_URL || '';
 
-    // Use provided URL or fallback to dynamic page
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oceanfresh.com';
-    const invoiceLink = invoiceUrl || `${appUrl}/orders/${order.id}/invoice`;
+    // Extract just the filename from the full URL if needed
+    const customerName = order.user?.name || order.deliveryName || 'Customer';
+    const customerPhone = order.user?.phone || order.deliveryPhone;
 
-    const components = [
-        {
-            type: 'body',
-            parameters: [
-                { type: 'text', text: order.orderNumber },
-                { type: 'text', text: `₹${(order.total / 100).toFixed(2)}` },
-                { type: 'text', text: invoiceLink }
-            ]
-        }
-    ];
+    if (!customerPhone) {
+        console.error('❌ No customer phone for WhatsApp');
+        return;
+    }
 
-    await sendWhatsAppMessage(order.user?.phone || order.deliveryPhone, 'order_confirmation', components);
+    // Invoice filename for CTA button (e.g., "ORD-123456.pdf")
+    const invoiceFileName = `${order.orderNumber}.pdf`;
+
+    const bodyValues: Record<string, string> = {
+        '1': customerName,
+        '2': order.orderNumber,
+        '3': `₹${(order.total / 100).toFixed(0)}`,
+        '4': invoiceFileName
+    };
+
+    return sendAuthkeyWhatsApp(customerPhone, templateId, bodyValues);
 };
 
+/**
+ * Send Admin Alert for New Order
+ * Uses same or different template based on your Authkey setup
+ */
 export const sendAdminAlertWhatsApp = async (order: any) => {
-    // Template: admin_new_order
-    // Variables: {{1}} = Order #, {{2}} = Amount, {{3}} = Customer Name
+    const adminPhone = process.env.ADMIN_PHONE;
+    if (!adminPhone) {
+        console.log('⚠️ No ADMIN_PHONE configured, skipping admin alert');
+        return;
+    }
 
-    const adminPhone = process.env.ADMIN_PHONE; // Admin's WhatsApp number
-    if (!adminPhone) return;
+    // Use same template or a different one for admin
+    const templateId = process.env.AUTHKEY_ADMIN_TEMPLATE_ID || process.env.AUTHKEY_TEMPLATE_ID || '101';
 
-    const components = [
-        {
-            type: 'body',
-            parameters: [
-                { type: 'text', text: order.orderNumber },
-                { type: 'text', text: `₹${(order.total / 100).toFixed(2)}` },
-                { type: 'text', text: order.user?.name || order.deliveryName || 'Customer' }
-            ]
-        }
-    ];
+    const customerName = order.user?.name || order.deliveryName || 'Customer';
 
-    await sendWhatsAppMessage(adminPhone, 'admin_new_order', components);
+    const bodyValues: Record<string, string> = {
+        '1': customerName,
+        '2': order.orderNumber,
+        '3': `₹${(order.total / 100).toFixed(0)}`,
+        '4': `${order.orderNumber}.pdf`
+    };
+
+    return sendAuthkeyWhatsApp(adminPhone, templateId, bodyValues);
 };

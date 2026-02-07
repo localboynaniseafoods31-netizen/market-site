@@ -53,14 +53,16 @@ model User {
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  slug        String    @unique
-  name        String
-  description String?
-  icon        String?   // Path to category image
-  products    Product[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  slug           String    @unique
+  name           String
+  description    String?
+  icon           String?   // Path to category image
+  dealPercentage Int?      // Category-wide discount percentage
+  dealActive     Boolean   @default(false)
+  products       Product[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Product {
@@ -185,3 +187,57 @@ model AuditLog {
   @@index([action])
   @@index([userId])
 }
+
+// ==================== MEDIA LIBRARY ====================
+
+enum MediaType {
+  CATEGORY_ICON
+  PRODUCT_IMAGE
+  BANNER
+  OTHER
+}
+
+model Media {
+  id          String    @id @default(uuid())
+  filename    String    // Original filename
+  key         String    @unique  // R2 object key
+  url         String    // Public URL
+  type        MediaType @default(OTHER)
+  size        Int       // Bytes
+  width       Int?
+  height      Int?
+  mimeType    String
+  uploadedBy  String?
+  createdAt   DateTime  @default(now())
+}
+
+model SaleBanner {
+  id        String    @id @default(uuid())
+  title     String
+  imageUrl  String    // R2 URL
+  linkUrl   String?
+  isActive  Boolean   @default(true)
+  position  Int       @default(0)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ==================== CRAZY DEALS (Homepage Banners) ====================
+
+model CrazyDeal {
+  id          String   @id @default(uuid())
+  title       String   // e.g., "Weekend Splash Sale"
+  subtitle    String   // e.g., "Flat 20% OFF on Prawns"
+  description String?
+  bgColor     String   @default("from-sky-500 to-blue-600") // Tailwind gradient
+  imageUrl    String   // R2 URL
+  promoCode   String?  // e.g., "WEEKEND20"
+  linkUrl     String   @default("/category/deals")
+  isActive    Boolean  @default(true)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

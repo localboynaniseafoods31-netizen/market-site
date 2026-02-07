@@ -103,6 +103,23 @@ export default async function V2Page() {
     // Filter Deals
     const deals = products.filter(p => (p.offerPercentage || 0) > 0);
 
+    // Fetch CrazyDeals for banners
+    const crazyDealsData = await prisma.crazyDeal.findMany({
+        where: { isActive: true },
+        orderBy: { position: 'asc' }
+    });
+
+    const banners = crazyDealsData.map(d => ({
+        id: d.id,
+        title: d.title,
+        subtitle: d.subtitle,
+        description: d.description,
+        bgColor: d.bgColor,
+        image: d.imageUrl,
+        code: d.promoCode,
+        link: d.linkUrl
+    }));
+
     return (
         <main className="min-h-screen bg-background ocean-mesh">
             <script
@@ -113,7 +130,7 @@ export default async function V2Page() {
             <HeroSection />
 
             {/* Promotional Space */}
-            <DiscountBanner deals={deals} />
+            <DiscountBanner deals={deals} banners={banners} />
 
             {/* Shop Experience Sections */}
             <div className="space-y-12 pb-20">

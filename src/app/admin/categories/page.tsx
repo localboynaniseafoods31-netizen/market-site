@@ -4,13 +4,19 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, Trash2, Tags } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Pencil, Trash2, Tags, Percent } from 'lucide-react';
+import { ImagePicker } from '@/components/admin/ImagePicker';
+import Image from 'next/image';
 
 interface Category {
     id: string;
     name: string;
     slug: string;
     description: string | null;
+    icon: string | null;
+    dealPercentage: number | null;
+    dealActive: boolean;
     productCount: number;
 }
 
@@ -18,7 +24,14 @@ export default function AdminCategoriesPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [form, setForm] = useState({ name: '', slug: '', description: '' });
+    const [form, setForm] = useState({
+        name: '',
+        slug: '',
+        description: '',
+        icon: '',
+        dealPercentage: 0,
+        dealActive: false
+    });
     const [saving, setSaving] = useState(false);
 
     const fetchCategories = () => {
@@ -46,11 +59,15 @@ export default function AdminCategoriesPage() {
         const res = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form),
+            body: JSON.stringify({
+                ...form,
+                icon: form.icon || null,
+                dealPercentage: form.dealPercentage || null
+            }),
         });
 
         if (res.ok) {
-            setForm({ name: '', slug: '', description: '' });
+            setForm({ name: '', slug: '', description: '', icon: '', dealPercentage: 0, dealActive: false });
             setEditingId(null);
             fetchCategories();
         }
@@ -59,7 +76,14 @@ export default function AdminCategoriesPage() {
 
     const handleEdit = (cat: Category) => {
         setEditingId(cat.id);
-        setForm({ name: cat.name, slug: cat.slug, description: cat.description || '' });
+        setForm({
+            name: cat.name,
+            slug: cat.slug,
+            description: cat.description || '',
+            icon: cat.icon || '',
+            dealPercentage: cat.dealPercentage || 0,
+            dealActive: cat.dealActive
+        });
     };
 
     const handleDelete = async (id: string, name: string, productCount: number) => {
@@ -72,6 +96,19 @@ export default function AdminCategoriesPage() {
         const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
         if (res.ok) {
             setCategories(categories.filter((c) => c.id !== id));
+        }
+    };
+
+    const toggleDeal = async (cat: Category) => {
+        try {
+            await fetch(`/api/admin/categories/${cat.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dealActive: !cat.dealActive }),
+            });
+            fetchCategories();
+        } catch (error) {
+            console.error('Toggle failed:', error);
         }
     };
 
@@ -93,7 +130,7 @@ export default function AdminCategoriesPage() {
             {/* Add/Edit Form */}
             <Card className="p-4">
                 <h3 className="font-semibold mb-4">{editingId ? 'Edit Category' : 'Add Category'}</h3>
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Input
                         placeholder="Name"
                         value={form.name}
@@ -109,7 +146,33 @@ export default function AdminCategoriesPage() {
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                     />
-                    <div className="flex gap-2">
+                    <ImagePicker
+                        value={form.icon}
+                        onChange={(url) => setForm({ ...form, icon: url })}
+                        type="CATEGORY_ICON"
+                        label="Icon"
+                    />
+                </div>
+                <div className="grid gap-4 md:grid-cols-3 mt-4">
+                    <div>
+                        <label className="text-sm font-medium mb-1 block">Deal % (0-100)</label>
+                        <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={form.dealPercentage || ''}
+                            onChange={(e) => setForm({ ...form, dealPercentage: Number(e.target.value) })}
+                            placeholder="e.g., 20"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 pt-6">
+                        <Switch
+                            checked={form.dealActive}
+                            onCheckedChange={(checked) => setForm({ ...form, dealActive: checked })}
+                        />
+                        <label className="text-sm">Deal Active</label>
+                    </div>
+                    <div className="flex gap-2 items-end">
                         <Button onClick={handleSave} disabled={saving}>
                             {editingId ? 'Update' : 'Add'}
                         </Button>
@@ -118,7 +181,7 @@ export default function AdminCategoriesPage() {
                                 variant="outline"
                                 onClick={() => {
                                     setEditingId(null);
-                                    setForm({ name: '', slug: '', description: '' });
+                                    setForm({ name: '', slug: '', description: '', icon: '', dealPercentage: 0, dealActive: false });
                                 }}
                             >
                                 Cancel
@@ -134,11 +197,31 @@ export default function AdminCategoriesPage() {
                     <Card key={cat.id} className="p-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-primary/10 rounded-lg">
-                                    <Tags className="text-primary" size={20} />
-                                </div>
+                                {cat.icon ? (
+                                    <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-slate-100">
+                                        <Image
+                                            src={cat.icon}
+                                            alt={cat.name}
+                                            fill
+                                            className="object-cover"
+                                            unoptimized
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="p-3 bg-primary/10 rounded-lg">
+                                        <Tags className="text-primary" size={20} />
+                                    </div>
+                                )}
                                 <div>
-                                    <h3 className="font-semibold">{cat.name}</h3>
+                                    <h3 className="font-semibold flex items-center gap-2">
+                                        {cat.name}
+                                        {cat.dealActive && cat.dealPercentage && (
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                                                <Percent size={10} />
+                                                {cat.dealPercentage}% OFF
+                                            </span>
+                                        )}
+                                    </h3>
                                     <p className="text-sm text-muted-foreground">/{cat.slug}</p>
                                 </div>
                             </div>
@@ -146,6 +229,12 @@ export default function AdminCategoriesPage() {
                                 <span className="text-sm text-muted-foreground">
                                     {cat.productCount} products
                                 </span>
+                                {cat.dealPercentage && cat.dealPercentage > 0 && (
+                                    <Switch
+                                        checked={cat.dealActive}
+                                        onCheckedChange={() => toggleDeal(cat)}
+                                    />
+                                )}
                                 <Button variant="outline" size="icon" onClick={() => handleEdit(cat)}>
                                     <Pencil size={16} />
                                 </Button>

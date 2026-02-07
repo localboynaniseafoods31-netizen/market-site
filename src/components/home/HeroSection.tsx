@@ -176,7 +176,7 @@ export default function HeroSection() {
                             className="relative z-10 w-full h-full flex items-center justify-center p-8"
                         >
                             <Image
-                                src="/images/hero-desktop.png"
+                                src="https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/banners/hero-desktop.png"
                                 alt="Premium Seafood Platter"
                                 width={700}
                                 height={700}

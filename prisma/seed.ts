@@ -126,7 +126,7 @@ async function main() {
     });
 
     // ==================== USERS & AUTH ====================
-    const adminPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = await bcrypt.hash('BlueWhale#8821!', 10);
     const admin = await prisma.user.create({
         data: {
             username: 'admin',
@@ -138,7 +138,7 @@ async function main() {
         },
     });
 
-    const editorPassword = await bcrypt.hash('editor123', 10);
+    const editorPassword = await bcrypt.hash('DolphinSale$7719', 10);
     const editor = await prisma.user.create({
         data: {
             username: 'editor',

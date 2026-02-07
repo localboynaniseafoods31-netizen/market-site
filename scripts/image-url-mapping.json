@@ -1,0 +1,24 @@
+{
+  "categories": {
+    "combos.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/combos.png",
+    "crabs.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/crabs.png",
+    "crabs_v3.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/crabs_v3.png",
+    "marine.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine.png",
+    "marine_v3.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png",
+    "prawns.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/prawns.png",
+    "prawns_v3.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/prawns_v3.png",
+    "river.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/river.png",
+    "river_v3.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/river_v3.png",
+    "rtc.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/rtc.png",
+    "rtc_v3.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/rtc_v3.png"
+  },
+  "products": {
+    "seer-fish.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/products/seer-fish.png",
+    "tiger-prawns.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/products/tiger-prawns.png"
+  },
+  "banners": {
+    "bulk-orders.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/banners/bulk-orders.png",
+    "hero-desktop.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/banners/hero-desktop.png",
+    "hero-mobile.png": "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/banners/hero-mobile.png"
+  }
+}

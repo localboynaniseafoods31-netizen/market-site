@@ -1,4 +1,4 @@
-"use strict";
+'use client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Truck, ShieldCheck, Clock, Share2, Heart, Scale, Users, CheckCircle2 } from "lucide-react";

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { CATEGORIES } from "@/data/seafoodData";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { LayoutGrid, ChevronRight, ChevronLeft } from "lucide-react";
+import { LayoutGrid, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 
 export interface SidebarCategory {
     slug: string;
@@ -26,15 +25,37 @@ export default function CategorySidebar({ categories: propCategories }: Category
     const currentSlug = pathname.split("/").pop();
     const isAllActive = pathname === "/category/all";
     const [isExpanded, setIsExpanded] = useState(false);
+    const [categories, setCategories] = useState<SidebarCategory[]>(propCategories || []);
+    const [loading, setLoading] = useState(!propCategories);
 
-    // Use passed categories or fallback to static data (mapped to match interface)
-    const categories = propCategories || CATEGORIES.map(c => ({
-        slug: c.slug,
-        name: c.name,
-        icon: c.icon,
-        description: c.description,
-        count: c.products.length
-    }));
+    // Fetch categories from API if not provided as props
+    useEffect(() => {
+        if (!propCategories) {
+            fetch('/api/categories')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.categories) {
+                        setCategories(data.categories.map((c: any) => ({
+                            slug: c.slug,
+                            name: c.name,
+                            icon: c.icon,
+                            description: c.description,
+                            count: c._count?.products || 0
+                        })));
+                    }
+                })
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        }
+    }, [propCategories]);
+
+    if (loading) {
+        return (
+            <aside className="md:w-64 p-4 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+            </aside>
+        );
+    }
 
     return (
         <>

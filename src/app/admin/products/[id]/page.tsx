@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { ImagePicker } from '@/components/admin/ImagePicker';
 
 interface Category {
     id: string;
@@ -28,7 +29,7 @@ export default function EditProductPage() {
         name: '',
         slug: '',
         description: '',
-        image: '/images/categories/marine_v3.png',
+        image: '',
         images: [] as string[],
         grossWeight: '',
         netWeight: '',
@@ -229,11 +230,11 @@ export default function EditProductPage() {
 
                     {/* Image */}
                     <div>
-                        <label className="text-sm font-medium">Image URL *</label>
-                        <Input
+                        <ImagePicker
                             value={form.image}
-                            onChange={(e) => setForm({ ...form, image: e.target.value })}
-                            required
+                            onChange={(url) => setForm({ ...form, image: url })}
+                            type="PRODUCT_IMAGE"
+                            label="Product Image *"
                         />
                     </div>
 
