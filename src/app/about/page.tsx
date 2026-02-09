@@ -4,22 +4,22 @@ import Image from 'next/image';
 
 export const metadata: Metadata = {
     title: `About Us - ${SITE_NAME}`,
-    description: 'Learn about Ocean Fresh, our mission to deliver sustainable, chemical-free seafood directly from coast to your kitchen.',
-    keywords: ['seafood delivery', 'about ocean fresh', 'sustainable fishing', 'fresh fish bangalore']
+    description: 'Learn about Localboynaniseafoods, our mission to deliver sustainable, chemical-free seafood directly from coast to your kitchen.',
+    keywords: ['seafood delivery', 'about localboynaniseafoods', 'sustainable fishing', 'fresh fish bangalore']
 };
 
 export default function AboutPage() {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "AboutPage",
-        "name": "About Ocean Fresh",
+        "name": "About Localboynaniseafoods",
         "description": "Our mission to deliver sustainable seafood.",
         "publisher": {
             "@type": "Organization",
             "name": SITE_NAME,
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://oceanfresh.com/logo.png"
+                "url": "https://localboynaniseafoods.com/logo.jpeg"
             }
         }
     };
@@ -37,7 +37,7 @@ export default function AboutPage() {
 
                 <div className="prose prose-lg dark:prose-invert max-w-none">
                     <p className="text-xl md:text-2xl font-light leading-relaxed text-muted-foreground mb-12">
-                        Ocean Fresh was born from a simple desire: to bring the taste of the coast to the city, without compromising on freshness or quality.
+                        Localboynaniseafoods was born from a simple desire: to bring the taste of the coast to the city, without compromising on freshness or quality.
                     </p>
 
                     <div className="grid md:grid-cols-2 gap-8 mb-16 not-prose">

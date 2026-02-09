@@ -37,7 +37,7 @@ export default async function AdminLayout({
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin" className="text-xl font-black text-primary truncate max-w-[150px] md:max-w-none">
-                            Ocean Fresh Admin
+                            Localboynaniseafoods Admin
                         </Link>
                     </div>
                     <div className="flex items-center gap-2 md:gap-4">

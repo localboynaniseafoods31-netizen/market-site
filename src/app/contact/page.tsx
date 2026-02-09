@@ -7,23 +7,23 @@ import { Mail, MapPin, Phone } from 'lucide-react';
 
 export const metadata: Metadata = {
     title: `Contact Us - ${SITE_NAME}`,
-    description: 'Get in touch with Ocean Fresh for orders, support, or bulk inquiries.',
-    keywords: ['contact ocean fresh', 'customer support', 'seafood bulk order']
+    description: 'Get in touch with Localboynaniseafoods for orders, support, or bulk inquiries.',
+    keywords: ['contact localboynaniseafoods', 'customer support', 'seafood bulk order']
 };
 
 export default function ContactPage() {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "ContactPage",
-        "description": "Contact Ocean Fresh support team",
+        "description": "Contact Localboynaniseafoods support team",
         "mainEntity": {
             "@type": "Organization",
             "name": SITE_NAME,
             "contactPoint": {
                 "@type": "ContactPoint",
-                "telephone": "+91-9876543210",
+                "telephone": "+91-9912163082",
                 "contactType": "customer service",
-                "email": "support@oceanfresh.com"
+                "email": "hello@localboynaniseafoods.com"
             }
         }
     };
@@ -51,7 +51,7 @@ export default function ContactPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg">Phone Support</h3>
-                                    <p className="text-muted-foreground">+91 98765 43210</p>
+                                    <p className="text-muted-foreground">+91 99121 63082</p>
                                     <p className="text-sm text-slate-400">Mon-Sun, 8am - 8pm</p>
                                 </div>
                             </div>
@@ -62,7 +62,7 @@ export default function ContactPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg">Email Us</h3>
-                                    <p className="text-muted-foreground">support@oceanfresh.com</p>
+                                    <p className="text-muted-foreground">hello@localboynaniseafoods.com</p>
                                     <p className="text-sm text-slate-400">Response within 24 hours</p>
                                 </div>
                             </div>

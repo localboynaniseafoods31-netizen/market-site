@@ -21,8 +21,13 @@ const monoFont = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ocean Fresh - Premium Seafood Delivery",
+  title: "Localboynaniseafoods - Premium Seafood Delivery",
   description: "Fresh fish and prawns delivered to your doorstep. Bulk orders available.",
+  icons: {
+    icon: '/logo.jpeg',
+    shortcut: '/logo.jpeg',
+    apple: '/logo.jpeg', // Optional, if you want it for Apple devices
+  },
 };
 
 import Navbar from "@/components/layout/Navbar";

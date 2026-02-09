@@ -45,7 +45,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <h1 className="text-3xl font-bold">INVOICE</h1>
-                            <p className="mt-2 opacity-90">Ocean Fresh Seafoods</p>
+                            <p className="mt-2 opacity-90">Localboynaniseafoods</p>
                             <p className="text-sm opacity-80">Premium Quality Delivery</p>
                         </div>
                         <div className="text-right">
@@ -120,8 +120,8 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 
                 {/* Footer */}
                 <div className="bg-slate-50 p-8 text-center text-slate-500 text-sm print:bg-white print:mt-8">
-                    <p>Thank you for choosing Ocean Fresh!</p>
-                    <p className="mt-1">For support, contact us at support@oceanfresh.com or +91 99999 88888</p>
+                    <p>Thank you for choosing Localboynaniseafoods!</p>
+                    <p className="mt-1">For support, contact us at hello@localboynaniseafoods.com or +91 99121 63082</p>
                 </div>
             </div>
         </main>

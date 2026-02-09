@@ -74,7 +74,7 @@ function LoginForm() {
                         </div>
                     </div>
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                        Ocean Fresh Login
+                        Localboynaniseafoods Login
                     </h1>
                     <p className="text-muted-foreground mt-2">
                         Enter your credentials to access the portal
@@ -133,7 +133,7 @@ function LoginForm() {
                 </Card>
 
                 <p className="text-center text-xs text-muted-foreground mt-8">
-                    &copy; 2024 Ocean Fresh. All rights reserved.
+                    &copy; 2024 Localboynaniseafoods. All rights reserved.
                 </p>
             </div>
         </div>

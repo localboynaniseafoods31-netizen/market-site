@@ -3,7 +3,7 @@ import { SITE_NAME } from '@/config';
 
 export const metadata: Metadata = {
     title: `Privacy Policy - ${SITE_NAME}`,
-    description: 'Privacy Policy for Ocean Fresh. How we collect, use, and protect your data.',
+    description: 'Privacy Policy for Localboynaniseafoods. How we collect, use, and protect your data.',
     robots: 'noindex, follow' // Legal pages don't need to be indexed primarily
 };
 

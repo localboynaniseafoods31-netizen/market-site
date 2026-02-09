@@ -59,6 +59,6 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
 };
 
 // SEO
-export const SITE_NAME = 'OceanFresh';
+export const SITE_NAME = 'Localboynaniseafoods';
 export const SITE_DESCRIPTION = 'Fresh fish and prawns delivered to your doorstep. Premium seafood, cleaned and ready to cook.';
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://oceanfresh.in';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://localboynaniseafoods.com';

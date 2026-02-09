@@ -49,7 +49,7 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<Buffer> => 
         doc.fillColor(primaryColor)
             .fontSize(28)
             .font('Helvetica-Bold')
-            .text('Ocean Fresh', 50, 50);
+            .text('Localboynaniseafoods', 50, 50);
 
         doc.fillColor(mutedColor)
             .fontSize(10)
@@ -187,8 +187,8 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<Buffer> => 
         doc.fillColor(mutedColor)
             .fontSize(9)
             .font('Helvetica')
-            .text('Thank you for choosing Ocean Fresh!', 50, footerY, { align: 'center', width: 495 })
-            .text('For support, contact us at support@oceanfresh.com or +91 99999 88888', 50, footerY + 15, { align: 'center', width: 495 });
+            .text('Thank you for choosing Localboynaniseafoods!', 50, footerY, { align: 'center', width: 495 })
+            .text('For support, contact us at hello@localboynaniseafoods.com or +91 99121 63082', 50, footerY + 15, { align: 'center', width: 495 });
 
         if (data.paymentId) {
             doc.fontSize(8)

@@ -38,7 +38,7 @@ export default function TestimonialsSection() {
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
                     <h2 className="text-3xl md:text-5xl font-black text-foreground">What Our Chefs Say</h2>
-                    <p className="text-muted-foreground text-lg">Join 10,000+ happy customers who trust Ocean Fresh for their daily catch.</p>
+                    <p className="text-muted-foreground text-lg">Join 10,000+ happy customers who trust Localboynaniseafoods for their daily catch.</p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-8">

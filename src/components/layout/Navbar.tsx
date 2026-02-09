@@ -55,8 +55,20 @@ export default function Navbar() {
         <header className="hidden md:block sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-primary tracking-tight">Ocean Fresh</span>
+                <Link href="/" className="flex items-center gap-3">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden border border-primary/20">
+                        <img
+                            src="/logo.jpeg"
+                            alt="Localboynaniseafoods"
+                            className="object-cover w-full h-full"
+                        />
+                    </div>
+                    <span className="text-xl md:text-2xl font-black text-primary tracking-tight hidden sm:block">
+                        Localboynaniseafoods
+                    </span>
+                    <span className="text-xl font-black text-primary tracking-tight sm:hidden">
+                        Localboy
+                    </span>
                 </Link>
 
                 {/* Location Selector with Dialog */}

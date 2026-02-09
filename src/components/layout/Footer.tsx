@@ -11,7 +11,16 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                     {/* Brand & App */}
                     <div className="space-y-6">
-                        <div className="text-2xl font-black text-blue-600">Ocean Fresh</div>
+                        <div className="flex items-center gap-3">
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-blue-600/20">
+                                <img
+                                    src="/logo.jpeg"
+                                    alt="Localboynaniseafoods"
+                                    className="object-cover w-full h-full"
+                                />
+                            </div>
+                            <div className="text-xl font-black text-blue-600">Localboynaniseafoods</div>
+                        </div>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                             Premium seafood delivered fresh from the ocean to your doorstep in 120 minutes. Chemical-free and expertly cleaned.
                         </p>
@@ -71,11 +80,11 @@ export default function Footer() {
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-muted-foreground text-sm">
                                 <Phone size={18} className="text-blue-600" />
-                                <span>1800-OCEAN-FRESH</span>
+                                <span>+91 99121 63082</span>
                             </div>
                             <div className="flex items-center gap-3 text-muted-foreground text-sm">
                                 <Mail size={18} className="text-blue-600" />
-                                <span>hello@oceanfresh.com</span>
+                                <span>hello@localboynaniseafoods.com</span>
                             </div>
                             <div className="flex items-center gap-3 text-muted-foreground text-sm">
                                 <MapPin size={18} className="text-blue-600" />
@@ -109,7 +118,7 @@ export default function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="text-muted-foreground text-xs text-center md:text-left">
-                        © 2024 Ocean Fresh Seafood Pvt Ltd. All rights reserved.
+                        © 2024 Localboynaniseafoods Pvt Ltd. All rights reserved.
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="h-6 w-10 bg-muted rounded opacity-50" />

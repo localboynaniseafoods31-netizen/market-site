@@ -4,7 +4,7 @@ import { Truck, Clock, MapPin } from 'lucide-react';
 
 export const metadata: Metadata = {
     title: `Shipping Policy - ${SITE_NAME}`,
-    description: 'Delivery areas, times, and shipping fees for Ocean Fresh.',
+    description: 'Delivery areas, times, and shipping fees for Localboynaniseafoods.',
 };
 
 export default function ShippingPage() {

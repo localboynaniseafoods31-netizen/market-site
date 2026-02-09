@@ -3,7 +3,7 @@ import { SITE_NAME } from '@/config';
 
 export const metadata: Metadata = {
     title: `Terms of Service - ${SITE_NAME}`,
-    description: 'Terms and Conditions for using Ocean Fresh website.',
+    description: 'Terms and Conditions for using Localboynaniseafoods website.',
     robots: 'noindex, follow'
 };
 

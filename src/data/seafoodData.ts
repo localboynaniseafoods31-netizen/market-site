@@ -1,5 +1,5 @@
 /**
- * Central Data Store for Ocean Fresh Seafood Website
+ * Central Data Store for Localboynaniseafoods Website
  * 
  * This file contains all products, categories, and related data.
  * Easy to migrate to a database later - just replace these exports with API calls.

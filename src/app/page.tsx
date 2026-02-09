@@ -32,18 +32,18 @@ export default async function V2Page() {
             {
                 "@type": "WebSite",
                 "name": SITE_NAME,
-                "url": "https://oceanfresh.com",
+                "url": "https://localboynaniseafoods.com",
                 "potentialAction": {
                     "@type": "SearchAction",
-                    "target": "https://oceanfresh.com/search?q={search_term_string}",
+                    "target": "https://localboynaniseafoods.com/search?q={search_term_string}",
                     "query-input": "required name=search_term_string"
                 }
             },
             {
                 "@type": "Organization",
                 "name": SITE_NAME,
-                "url": "https://oceanfresh.com",
-                "logo": "https://oceanfresh.com/logo.png",
+                "url": "https://localboynaniseafoods.com",
+                "logo": "https://localboynaniseafoods.com/logo.jpeg",
                 "contactPoint": {
                     "@type": "ContactPoint",
                     "telephone": "+91-9876543210",

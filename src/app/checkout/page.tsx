@@ -176,7 +176,7 @@ export default function CheckoutPage() {
                 key: paymentData.keyId,
                 amount: paymentData.amount,
                 currency: paymentData.currency,
-                name: "Ocean Fresh",
+                name: "Localboynaniseafoods",
                 description: "Premium Seafood Order",
                 order_id: paymentData.id,
                 handler: async function (response: any) {

@@ -38,10 +38,10 @@ export async function GET(
 
             // Company Info
             company: {
-                name: 'Ocean Fresh',
+                name: 'Localboynaniseafoods',
                 address: 'Bangalore, Karnataka, India',
-                phone: '+91-9876543210',
-                email: 'support@oceanfresh.com',
+                phone: '+91-9912163082',
+                email: 'hello@localboynaniseafoods.com',
                 gstin: 'GSTIN_PLACEHOLDER', // Replace with actual GSTIN
             },
 

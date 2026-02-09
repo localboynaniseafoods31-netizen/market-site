@@ -55,7 +55,7 @@ export const sendOrderConfirmation = async (order: OrderEmailProps, email: strin
     <body>
         <div class="container">
             <div class="header">
-                <h1>Ocean Fresh</h1>
+                <h1>Localboynaniseafoods</h1>
                 <p>Premium Seafood Delivery</p>
             </div>
             
@@ -95,8 +95,8 @@ export const sendOrderConfirmation = async (order: OrderEmailProps, email: strin
             </div>
 
             <div class="footer">
-                <p>If you have any questions, please contact us at support@oceanfresh.com</p>
-                <p>&copy; ${new Date().getFullYear()} Ocean Fresh. All rights reserved.</p>
+                <p>If you have any questions, please contact us at hello@localboynaniseafoods.com</p>
+                <p>&copy; ${new Date().getFullYear()} Localboynaniseafoods. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -113,7 +113,7 @@ export const sendOrderConfirmation = async (order: OrderEmailProps, email: strin
         }
 
         await transporter.sendMail({
-            from: '"Ocean Fresh" <orders@oceanfresh.com>',
+            from: '"Localboynaniseafoods" <orders@localboynaniseafoods.com>',
             to: email,
             subject: `Order Confirmation - ${order.orderNumber}`,
             html,
@@ -150,7 +150,7 @@ export const sendAdminNotification = async (order: OrderEmailProps) => {
             return;
         }
 
-        const adminEmails = (process.env.ADMIN_EMAIL || 'admin@oceanfresh.com')
+        const adminEmails = (process.env.ADMIN_EMAIL || 'admin@localboynaniseafoods.com')
             .split(',')
             .map(e => e.trim())
             .filter(e => e.length > 0);
@@ -160,7 +160,7 @@ export const sendAdminNotification = async (order: OrderEmailProps) => {
         // Send to all admins in parallel
         await Promise.all(adminEmails.map(email =>
             transporter.sendMail({
-                from: '"Ocean Fresh System" <system@oceanfresh.com>',
+                from: '"Localboynaniseafoods System" <system@localboynaniseafoods.com>',
                 to: email,
                 subject: `New Order: ${order.orderNumber}`,
                 html,

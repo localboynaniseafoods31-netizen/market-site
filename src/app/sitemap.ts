@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllCategories, getAllProducts } from '@/data/seafoodData';
 
-const BASE_url = 'https://oceanfresh.com'; // Replace with actual domain
+const BASE_url = 'https://localboynaniseafoods.com'; // Replace with actual domain
 
 export default function sitemap(): MetadataRoute.Sitemap {
     // 1. Static Routes
