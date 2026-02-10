@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import Credentials from 'next-auth/providers/credentials';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
@@ -7,52 +7,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     secret: process.env.AUTH_SECRET,
     trustHost: true,
     providers: [
-        CredentialsProvider({
-            id: 'credentials',
-            name: 'Credentials',
+        Credentials({
             credentials: {
                 username: { label: 'Username', type: 'text' },
                 password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials) {
-                console.log('Login attempt for:', credentials?.username);
-                const username = credentials?.username as string;
-                const password = credentials?.password as string;
+                try {
+                    const username = credentials?.username as string;
+                    const password = credentials?.password as string;
 
-                if (!username || !password) {
-                    console.log('Missing username or password');
-                    throw new Error('Username and password required');
+                    if (!username || !password) {
+                        return null;
+                    }
+
+                    // Find user
+                    const user = await prisma.user.findUnique({
+                        where: { username },
+                    });
+
+                    if (!user || !user.password) {
+                        return null;
+                    }
+
+                    // Verify password
+                    const isValid = await bcrypt.compare(password, user.password);
+
+                    if (!isValid) {
+                        return null;
+                    }
+
+                    return {
+                        id: user.id,
+                        name: user.name || user.username || '',
+                        email: user.email || '',
+                        username: user.username || undefined,
+                        phone: user.phone || undefined,
+                        role: user.role,
+                    };
+                } catch (error) {
+                    console.error('Auth error:', error);
+                    return null;
                 }
-
-                // Find user
-                const user = await prisma.user.findUnique({
-                    where: { username },
-                });
-
-                if (!user || !user.password) {
-                    console.log('User not found or no password:', { username, found: !!user });
-                    throw new Error('Invalid credentials');
-                }
-
-                console.log('User found:', { id: user.id, role: user.role, hashStart: user.password.substring(0, 10) });
-
-                // Verify password
-                const isValid = await bcrypt.compare(password, user.password);
-
-                console.log('Password valid:', isValid);
-
-                if (!isValid) {
-                    throw new Error('Invalid credentials');
-                }
-
-                return {
-                    id: user.id,
-                    username: user.username as string,
-                    phone: user.phone as string,
-                    email: user.email as string,
-                    name: user.name as string,
-                    role: user.role as 'USER' | 'ADMIN' | 'EDITOR',
-                };
             },
         }),
     ],
@@ -81,6 +77,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     session: {
         strategy: 'jwt',
-        maxAge: 24 * 60 * 60, // 24 hours (Daily expiry)
+        maxAge: 24 * 60 * 60, // 24 hours
     },
 });
