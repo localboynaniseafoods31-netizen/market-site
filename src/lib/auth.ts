@@ -13,11 +13,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials) {
+                console.log('Login attempt for:', credentials?.username);
                 try {
                     const username = credentials?.username as string;
                     const password = credentials?.password as string;
 
                     if (!username || !password) {
+                        console.log('Auth failed: Missing credentials');
                         return null;
                     }
 
@@ -26,17 +28,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         where: { username },
                     });
 
-                    if (!user || !user.password) {
+                    if (!user) {
+                        console.log('Auth failed: User not found in DB:', username);
+                        return null;
+                    }
+
+                    if (!user.password) {
+                        console.log('Auth failed: User has no password set');
                         return null;
                     }
 
                     // Verify password
                     const isValid = await bcrypt.compare(password, user.password);
+                    console.log('Password verification for', username, ':', isValid);
 
                     if (!isValid) {
                         return null;
                     }
 
+                    console.log('Auth successful for:', username);
                     return {
                         id: user.id,
                         name: user.name || user.username || '',
