@@ -65,16 +65,14 @@ export default function LocationHeader() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    if (pathname?.startsWith('/admin')) return null;
-
-    const saveLocation = (state: LocationState) => {
+    const saveLocation = useCallback((state: LocationState) => {
         setLocationState(state);
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } catch (e) {
             console.error('Failed to save location', e);
         }
-    };
+    }, []);
 
     const detectLocation = useCallback(async () => {
         setLoadingLocation(true);
@@ -142,7 +140,7 @@ export default function LocationHeader() {
             },
             { enableHighAccuracy: true, timeout: 10000 }
         );
-    }, []);
+    }, [saveLocation]);
 
     const checkManualPincode = useCallback(() => {
         if (manualPincode.length !== 6) return;
@@ -161,7 +159,10 @@ export default function LocationHeader() {
         saveLocation(newState);
         setManualPincode('');
         setIsDrawerOpen(false);
-    }, [manualPincode]);
+    }, [manualPincode, saveLocation]);
+
+    // EARLY RETURN MUST BE AFTER ALL HOOKS
+    if (pathname?.startsWith('/admin')) return null;
 
     const getLocationDisplay = () => {
         if (!locationState) return 'Select Location';
