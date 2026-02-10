@@ -15,7 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             async authorize(credentials) {
                 console.log('Login attempt for:', credentials?.username);
                 try {
-                    const username = credentials?.username as string;
+                    const username = (credentials?.username as string)?.toLowerCase();
                     const password = credentials?.password as string;
 
                     if (!username || !password) {
