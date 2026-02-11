@@ -171,3 +171,103 @@ export const sendAdminNotification = async (order: OrderEmailProps) => {
         console.error('❌ Failed to send admin notification:', error);
     }
 };
+
+/**
+ * Human-friendly status labels and messages
+ */
+const STATUS_INFO: Record<string, { label: string; emoji: string; message: string; color: string }> = {
+    PENDING: { label: 'Pending', emoji: '⏳', message: 'Your order is being reviewed.', color: '#f59e0b' },
+    CONFIRMED: { label: 'Confirmed', emoji: '✅', message: 'Your order has been confirmed and will be prepared soon!', color: '#22c55e' },
+    PROCESSING: { label: 'Processing', emoji: '🔧', message: 'Your order is being prepared with the freshest catch!', color: '#3b82f6' },
+    SHIPPED: { label: 'Shipped', emoji: '🚚', message: 'Your order is on the way! It will arrive soon.', color: '#8b5cf6' },
+    DELIVERED: { label: 'Delivered', emoji: '🎉', message: 'Your order has been delivered! Enjoy your fresh seafood.', color: '#10b981' },
+    CANCELLED: { label: 'Cancelled', emoji: '❌', message: 'Your order has been cancelled. If you have questions, please contact us.', color: '#ef4444' },
+};
+
+/**
+ * Send Order Status Update Email to Customer
+ */
+export const sendOrderStatusUpdateEmail = async (
+    email: string,
+    customerName: string,
+    orderNumber: string,
+    oldStatus: string,
+    newStatus: string,
+) => {
+    const info = STATUS_INFO[newStatus] || { label: newStatus, emoji: '📦', message: 'Your order status has been updated.', color: '#0ea5e9' };
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 20px; }
+            .header h1 { color: #0ea5e9; margin: 0; font-size: 22px; }
+            .status-card { background: #f8fafc; border-radius: 12px; padding: 24px; text-align: center; margin: 20px 0; border-left: 4px solid ${info.color}; }
+            .status-emoji { font-size: 48px; margin-bottom: 12px; }
+            .status-label { font-size: 24px; font-weight: bold; color: ${info.color}; margin-bottom: 8px; }
+            .status-message { font-size: 16px; color: #475569; }
+            .order-info { background: #f1f5f9; padding: 16px; border-radius: 8px; margin: 16px 0; }
+            .order-info p { margin: 4px 0; }
+            .track-btn { display: inline-block; background: #0ea5e9; color: white; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 16px 0; }
+            .footer { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Localboynaniseafoods</h1>
+                <p style="color: #64748b; margin: 4px 0;">Premium Seafood Delivery</p>
+            </div>
+
+            <p>Hi ${customerName},</p>
+
+            <div class="status-card">
+                <div class="status-emoji">${info.emoji}</div>
+                <div class="status-label">Order ${info.label}</div>
+                <div class="status-message">${info.message}</div>
+            </div>
+
+            <div class="order-info">
+                <p><strong>Order Number:</strong> ${orderNumber}</p>
+                <p><strong>Previous Status:</strong> ${STATUS_INFO[oldStatus]?.label || oldStatus}</p>
+                <p><strong>New Status:</strong> ${info.label}</p>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://market-site-eta.vercel.app'}/orders" class="track-btn">
+                    Track Your Order
+                </a>
+            </div>
+
+            <div class="footer">
+                <p>If you have any questions, contact us at hello@localboynaniseafoods.com</p>
+                <p>&copy; ${new Date().getFullYear()} Localboynaniseafoods. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    try {
+        if (!process.env.SMTP_HOST) {
+            console.log('---------------------------------------------------');
+            console.log(`📧 MOCK STATUS UPDATE EMAIL TO: ${email}`);
+            console.log(`Subject: Order ${orderNumber} - ${info.label}`);
+            console.log('---------------------------------------------------');
+            return;
+        }
+
+        await transporter.sendMail({
+            from: '"Localboynaniseafoods" <orders@localboynaniseafoods.com>',
+            to: email,
+            subject: `${info.emoji} Order ${orderNumber} - ${info.label}`,
+            html,
+        });
+        console.log(`✅ Status update email sent to ${email}`);
+    } catch (error) {
+        console.error('❌ Failed to send status update email:', error);
+    }
+};

@@ -140,3 +140,30 @@ export const sendAdminAlertWhatsApp = async (order: any) => {
 
     return sendAuthkeyWhatsApp(adminPhone, templateId, bodyValues);
 };
+
+/**
+ * Send Order Status Update WhatsApp
+ * Requires a template with 3 variables:
+ * {{1}} = Customer Name
+ * {{2}} = Order Number
+ * {{3}} = New Status (e.g. "Shipped", "Delivered")
+ */
+export const sendOrderStatusUpdateWhatsApp = async (
+    phone: string,
+    customerName: string,
+    orderNumber: string,
+    newStatus: string
+) => {
+    if (!phone) return;
+
+    // Use a specific template for status updates, or fallback to default
+    const templateId = process.env.AUTHKEY_STATUS_TEMPLATE_ID || '102';
+
+    const bodyValues: Record<string, string> = {
+        '1': customerName,
+        '2': orderNumber,
+        '3': newStatus
+    };
+
+    return sendAuthkeyWhatsApp(phone, templateId, bodyValues);
+};

@@ -17,7 +17,10 @@ export async function PATCH(
         const body = await request.json();
         const { status } = updateOrderStatusSchema.parse(body);
 
-        const order = await prisma.order.findUnique({ where: { id } });
+        const order = await prisma.order.findUnique({
+            where: { id },
+            include: { user: true }
+        });
         if (!order) {
             return errorResponse('NOT_FOUND', 'Order not found', 404);
         }
@@ -40,6 +43,36 @@ export async function PATCH(
 
             return updated;
         });
+
+        // Send Notifications (Fire & Forget)
+        const customerEmail = order.user?.email;
+        const customerPhone = order.user?.phone || order.deliveryPhone;
+        const customerName = order.user?.name || order.deliveryName || 'Customer';
+
+        // 1. Email Notification
+        if (customerEmail) {
+            import('@/lib/email').then(({ sendOrderStatusUpdateEmail }) => {
+                sendOrderStatusUpdateEmail(
+                    customerEmail,
+                    customerName,
+                    order.orderNumber,
+                    order.status as string,
+                    status
+                ).catch(err => console.error('Failed to send status email:', err));
+            });
+        }
+
+        // 2. WhatsApp Notification
+        if (customerPhone) {
+            import('@/lib/whatsapp').then(({ sendOrderStatusUpdateWhatsApp }) => {
+                sendOrderStatusUpdateWhatsApp(
+                    customerPhone,
+                    customerName,
+                    order.orderNumber,
+                    status
+                ).catch(err => console.error('Failed to send status whatsapp:', err));
+            });
+        }
 
         return successResponse({
             id: updatedOrder.id,
