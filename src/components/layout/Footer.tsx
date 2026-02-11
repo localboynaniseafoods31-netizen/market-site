@@ -119,6 +119,10 @@ export default function Footer() {
                 <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="text-muted-foreground text-xs text-center md:text-left">
                         © 2024 Localboynaniseafoods Pvt Ltd. All rights reserved.
+                        <span className="mx-2 hidden md:inline">|</span>
+                        <span className="block md:inline mt-1 md:mt-0">
+                            Built by <Link href="https://somanathkhadanga.com/" target="_blank" className="hover:text-foreground transition-colors">Somanath Khadanga</Link>
+                        </span>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="h-6 w-10 bg-muted rounded opacity-50" />
