@@ -1,38 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Local Boy Nani Seafoods — E-Commerce Platform
 
-## Getting Started
+🔗 **Live Site:** https://localboynaniseafoods.com
 
-First, run the development server:
+This repository contains the full-stack e-commerce platform built for **Local Boy Nani Seafoods**, a premium seafood delivery service focused on quality, freshness, and fast customer experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The platform was engineered to support real-time order management, secure payments, and scalable product operations.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Project Overview
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The objective was to deliver a high-performance, production-ready e-commerce solution tailored to a growing local business.
 
-## Learn More
+### Core Deliverables
 
-To learn more about Next.js, take a look at the following resources:
+- **Complete E-Commerce Workflow**  
+  Product listing, category filtering, cart management, and secure checkout flow.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Secure Payment Integration**  
+  Payment gateway integration with secure transaction handling and order confirmation flows.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Admin Dashboard**  
+  Backend management interface for:
+  - Product creation & updates  
+  - Pricing & inventory control  
+  - Real-time order tracking  
+  - Order status management  
 
-## Deploy on Vercel
+- **Performance Optimization**  
+  Built using **Next.js**, leveraging server-side rendering and optimized asset loading for improved SEO and fast page transitions.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Responsive UI/UX**  
+  Mobile-first architecture ensuring smooth interaction across all devices.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# market-site
-# market-site
+---
+
+## 🧠 Technical Architecture
+
+- Modular component-based frontend
+- Clean separation of UI and business logic
+- Structured API integration for order lifecycle
+- Optimized routing & page-level data fetching
+- Scalable codebase ready for feature expansion
+
+---
+
+## 📈 Business Impact
+
+The platform enables:
+
+- Streamlined online ordering
+- Reduced manual order handling
+- Improved customer purchase flow
+- Operational visibility for the business owner
+
+This project reflects the ability to design and deploy scalable e-commerce systems aligned with real-world operational requirements.
+
+---
+
+### Technical Partner
+
+Designed & developed by [Somanath Khadanga](https://somanathkhadanga.com/)
