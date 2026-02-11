@@ -145,6 +145,7 @@ model Order {
   deliveryAddress String
   deliveryCity    String
   deliveryPincode String
+  deliveryEmail   String?     // Added for order receipts
   
   // Payment
   paymentId       String?

@@ -3,11 +3,13 @@ import cartReducer, { setCart, CartItem } from './slices/cartSlice';
 import userReducer, { setUser, UserState } from './slices/userSlice';
 import orderReducer, { setOrders, Order } from './slices/orderSlice';
 import uiReducer from './slices/uiSlice';
+import locationReducer, { setLocation, LocationState } from './slices/locationSlice';
 
 // localStorage keys
 const CART_STORAGE_KEY = 'oceanfresh_cart';
 const USER_STORAGE_KEY = 'oceanfresh_user';
 const ORDERS_STORAGE_KEY = 'oceanfresh_orders';
+const LOCATION_STORAGE_KEY = 'localboynaniseafoods_location'; // Match key used in LocationHeader
 
 // Safe localStorage access (SSR compatible)
 const loadFromStorage = <T>(key: string): T | null => {
@@ -36,6 +38,7 @@ export const store = configureStore({
         user: userReducer,
         orders: orderReducer,
         ui: uiReducer,
+        location: locationReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -45,22 +48,28 @@ export const store = configureStore({
 
 // Hydrate store from localStorage (call on client mount)
 export const hydrateStore = () => {
-    // Hydrate cart (only productId + quantity - NO prices)
+    // ... (cart hydration)
     const savedCart = loadFromStorage<CartItem[]>(CART_STORAGE_KEY);
     if (savedCart && Array.isArray(savedCart)) {
         store.dispatch(setCart(savedCart));
     }
 
-    // Hydrate user (phone, name, addresses - NO sensitive data)
+    // ... (user hydration)
     const savedUser = loadFromStorage<Partial<UserState>>(USER_STORAGE_KEY);
     if (savedUser) {
         store.dispatch(setUser(savedUser));
     }
 
-    // Hydrate orders
+    // ... (orders hydration)
     const savedOrders = loadFromStorage<Order[]>(ORDERS_STORAGE_KEY);
     if (savedOrders && Array.isArray(savedOrders)) {
         store.dispatch(setOrders(savedOrders));
+    }
+
+    // Hydrate location
+    const savedLocation = loadFromStorage<LocationState>(LOCATION_STORAGE_KEY);
+    if (savedLocation) {
+        store.dispatch(setLocation(savedLocation));
     }
 };
 
@@ -69,10 +78,10 @@ export const setupPersistence = () => {
     store.subscribe(() => {
         const state = store.getState();
 
-        // Save cart (only IDs and quantities - prices are computed)
+        // Save cart
         saveToStorage(CART_STORAGE_KEY, state.cart.items);
 
-        // Save user (non-sensitive data only)
+        // Save user
         const userToSave = {
             phone: state.user.phone,
             name: state.user.name,
@@ -84,6 +93,11 @@ export const setupPersistence = () => {
 
         // Save orders
         saveToStorage(ORDERS_STORAGE_KEY, state.orders.orders);
+
+        // Save location
+        if (state.location) {
+            saveToStorage(LOCATION_STORAGE_KEY, state.location);
+        }
     });
 };
 

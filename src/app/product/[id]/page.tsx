@@ -56,6 +56,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         sourcing: dbProduct.sourcing || undefined,
         cutType: dbProduct.cutType || undefined,
         texture: dbProduct.texture || undefined,
+        stock: dbProduct.stock,
     };
 
     // Fetch related products
@@ -89,6 +90,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         sourcing: p.sourcing || undefined,
         cutType: p.cutType || undefined,
         texture: p.texture || undefined,
+        stock: p.stock,
     }));
 
     const jsonLd = {

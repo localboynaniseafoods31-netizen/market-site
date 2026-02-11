@@ -72,4 +72,8 @@ export {
 export type { CartItem } from './slices/cartSlice';
 export type { Address, UserState } from './slices/userSlice';
 export type { Order, OrderItem, OrderStatus } from './slices/orderSlice';
+export type { LocationState } from './slices/locationSlice';
+
+export { setLocation, clearLocation } from './slices/locationSlice';
+export { selectLocation, selectIsServiceable } from './selectors';
 

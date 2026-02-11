@@ -25,7 +25,8 @@ export const selectCartItemsWithDetails = (state: RootState) => {
                 netWeight: item.productSnapshot.weight,
                 grossWeight: item.productSnapshot.weight,
                 category: 'unknown',
-                inStock: true
+                inStock: true,
+                stock: item.productSnapshot.stock
             } as any; // Cast to bypass strict Product type check for minified object
         }
 
@@ -135,4 +136,19 @@ export const selectActiveOrders = (state: RootState): Order[] => {
     return state.orders.orders.filter((o: Order) =>
         !['delivered', 'cancelled'].includes(o.status)
     );
+};
+
+// ==================== LOCATION SELECTORS ====================
+
+export const selectLocation = (state: RootState) => state.location;
+
+export const selectIsServiceable = (state: RootState): boolean => {
+    return state.location?.isServiceable ?? false; // Default to false if no location selected? Or true?
+    // Competitor logic: If no location selected, usually assume serviceable or prompt.
+    // However, if state.location is null, we can return true to allow browsing,
+    // but prompts might be needed. For now, let's allow adding if location is unset, 
+    // but block if location is set AND unserviceable.
+    // Actually, safest is: true if null (assume deliverable until checked), false if explicitly unserviceable.
+    // BUT the prompt says "for the area we dont servr".
+    // So: if (location && !location.isServiceable) return false. Else true.
 };

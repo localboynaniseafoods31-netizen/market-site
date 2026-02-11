@@ -133,6 +133,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         sourcing: p.sourcing || undefined,
         cutType: p.cutType || undefined,
         texture: p.texture || undefined,
+        stock: p.stock,
     }));
 
     const jsonLd = {

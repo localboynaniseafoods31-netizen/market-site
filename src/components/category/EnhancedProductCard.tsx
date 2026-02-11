@@ -12,7 +12,8 @@ import {
     addToCart,
     incrementQuantity,
     decrementQuantity,
-    selectProductQuantity
+    selectProductQuantity,
+    selectIsServiceable
 } from "@/store";
 
 interface EnhancedProductCardProps extends Product { }
@@ -20,8 +21,16 @@ interface EnhancedProductCardProps extends Product { }
 export default function EnhancedProductCard(product: EnhancedProductCardProps) {
     const dispatch = useAppDispatch();
     const quantity = useAppSelector(selectProductQuantity(product.id));
+    const isServiceable = useAppSelector(selectIsServiceable);
 
     const handleAdd = () => {
+        if (!isServiceable) {
+            // Optional: Show toast or rely on UI state
+            return;
+        }
+        if (product.stock !== undefined && quantity >= product.stock) {
+            return;
+        }
         if (quantity === 0) {
             dispatch(addToCart({ productId: product.id, quantity: 1, product: product }));
         } else {
@@ -116,6 +125,11 @@ export default function EnhancedProductCard(product: EnhancedProductCardProps) {
                         <span className="text-[10px] font-bold text-yellow-600 dark:text-yellow-500 flex items-center gap-1 truncate">
                             ⚡ 60 min
                         </span>
+                        {(product.stock !== undefined && product.stock <= 5 && product.stock > 0) && (
+                            <span className="text-[10px] font-bold text-red-500 animate-pulse">
+                                Only {product.stock} left!
+                            </span>
+                        )}
                     </div>
 
                     {/* Add Controls (Bottom Right) */}
@@ -123,10 +137,12 @@ export default function EnhancedProductCard(product: EnhancedProductCardProps) {
                         {quantity === 0 ? (
                             <Button
                                 onClick={(e) => { e.preventDefault(); handleAdd(); }}
+                                disabled={(product.stock !== undefined && product.stock === 0) || !isServiceable}
                                 size="sm"
-                                className="h-8 px-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-sm transition-all active:scale-95 border-none"
+                                className="h-8 px-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-sm transition-all active:scale-95 border-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={!isServiceable ? "Not available in your location" : undefined}
                             >
-                                Add <Plus className="ml-1 w-3 h-3" />
+                                {product.stock !== undefined && product.stock === 0 ? "Out" : "Add"} <Plus className="ml-1 w-3 h-3" />
                             </Button>
                         ) : (
                             <div className="flex items-center bg-primary text-primary-foreground rounded-lg h-8 px-0 shadow-sm border border-primary">
@@ -139,7 +155,8 @@ export default function EnhancedProductCard(product: EnhancedProductCardProps) {
                                 <span className="text-xs font-black min-w-[20px] text-center">{quantity}</span>
                                 <button
                                     onClick={(e) => { e.preventDefault(); handleAdd(); }}
-                                    className="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-white/10 transition-colors"
+                                    disabled={product.stock !== undefined && quantity >= product.stock}
+                                    className="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Plus className="w-3.5 h-3.5" />
                                 </button>

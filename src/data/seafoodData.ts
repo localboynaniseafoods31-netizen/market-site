@@ -25,6 +25,7 @@ export interface Product {
     category: string;
     subcategory?: string;
     inStock?: boolean;
+    stock?: number;
     offerPercentage?: number;
 
     // New Rich Details

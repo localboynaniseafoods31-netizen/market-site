@@ -45,6 +45,7 @@ export default function CheckoutPage() {
     const [step, setStep] = useState<CheckoutStep>('details');
     const [phone, setPhoneInput] = useState(user.phone || '');
     const [name, setNameInput] = useState(user.name || '');
+    const [email, setEmailInput] = useState(user.email || ''); // Added email state
     const [addressInput, setAddressInput] = useState({
         fullAddress: defaultAddress?.fullAddress || '',
         landmark: defaultAddress?.landmark || '',
@@ -64,6 +65,7 @@ export default function CheckoutPage() {
     // Validate phone (10 digits)
     const isPhoneValid = /^[6-9]\d{9}$/.test(phone);
     const isNameValid = name.trim().length >= 2;
+    const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Optional but must be valid if present
     const isAddressValid = addressInput.fullAddress.length > 5 && addressInput.pincode.length === 6;
 
     // Auto-fill logic
@@ -77,6 +79,7 @@ export default function CheckoutPage() {
 
             if (data.found) {
                 if (data.name) setNameInput(data.name);
+                if (data.email) setEmailInput(data.email); // Auto-fill email
                 if (data.address) {
                     setAddressInput({
                         fullAddress: data.address.fullAddress || '',
@@ -94,7 +97,7 @@ export default function CheckoutPage() {
     };
 
     const handleContinue = () => {
-        if (step === 'details' && isPhoneValid && isNameValid) {
+        if (step === 'details' && isPhoneValid && isNameValid && isEmailValid) {
             dispatch(setPhone(phone));
             dispatch(setName(name));
             setStep('address');
@@ -134,6 +137,7 @@ export default function CheckoutPage() {
             total: finalTotal,
             phone,
             name,
+            email, // Send email to API
             address: addressInput.fullAddress,
             city: addressInput.city,
             pincode: addressInput.pincode,
@@ -395,11 +399,31 @@ export default function CheckoutPage() {
                                         />
                                     </div>
                                 </div>
+
+                                <div>
+                                    <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                                        Email (Optional)
+                                    </Label>
+                                    <div className="relative mt-1">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">@</div>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="For order receipt"
+                                            value={email}
+                                            onChange={(e) => setEmailInput(e.target.value)}
+                                            className="pl-10"
+                                        />
+                                    </div>
+                                    {!isEmailValid && (
+                                        <p className="text-xs text-red-500 mt-1">Enter a valid email address</p>
+                                    )}
+                                </div>
                             </div>
 
                             <Button
                                 onClick={handleContinue}
-                                disabled={!isPhoneValid || !isNameValid}
+                                disabled={!isPhoneValid || !isNameValid || !isEmailValid}
                                 className="w-full mt-6 h-12 rounded-full font-bold"
                             >
                                 Continue <ChevronRight className="ml-1 w-4 h-4" />

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Truck, ShieldCheck, Clock, Share2, Heart, Scale, Users, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/data/seafoodData";
-import { useAppDispatch, addToCart } from "@/store";
+import { useAppDispatch, addToCart, useAppSelector, selectProductQuantity } from "@/store";
 import { toast } from "sonner";
 
 interface ProductInfoProps {
@@ -13,10 +13,16 @@ interface ProductInfoProps {
 
 export default function ProductInfo({ product }: ProductInfoProps) {
     const dispatch = useAppDispatch();
+    const cartQuantity = useAppSelector(selectProductQuantity(product.id));
     const discount = product.offerPercentage || 0;
+    const stock = product.stock;
 
     const handleAddToCart = () => {
-        dispatch(addToCart({ productId: product.id, quantity: 1 }));
+        if (stock !== undefined && cartQuantity >= stock) {
+            toast.error(`Only ${stock} items available in stock`);
+            return;
+        }
+        dispatch(addToCart({ productId: product.id, quantity: 1, product: product }));
         toast.success(`Added ${product.title} to cart`);
     };
 
@@ -25,7 +31,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             {/* Header Section */}
             <div>
                 <div className="flex justify-between items-start mb-2">
-                    {product.inStock ? (
+                    {product.inStock && (stock === undefined || stock > 0) ? (
                         <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
                             In Stock
                         </Badge>
@@ -112,13 +118,20 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 </div>
 
                 <div className="space-y-3">
+                    {(stock !== undefined && stock <= 5 && stock > 0) && (
+                        <p className="text-red-500 font-bold text-sm animate-pulse mb-2">
+                            Only {stock} items left in stock!
+                        </p>
+                    )}
                     <Button
                         size="lg"
-                        className="w-full h-14 text-lg font-bold rounded-full"
+                        className="w-full h-14 text-lg font-bold rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleAddToCart}
-                        disabled={!product.inStock}
+                        disabled={!product.inStock || (stock !== undefined && (stock === 0 || cartQuantity >= stock))}
                     >
-                        {product.inStock ? "Add to Cart" : "Out of Stock"}
+                        {product.inStock && (stock === undefined || stock > 0)
+                            ? (stock !== undefined && cartQuantity >= stock ? "Limit Reached" : "Add to Cart")
+                            : "Out of Stock"}
                     </Button>
                     <p className="text-center text-xs text-slate-500 flex items-center justify-center gap-1">
                         <Truck className="w-3 h-3" />

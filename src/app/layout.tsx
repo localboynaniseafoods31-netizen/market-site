@@ -30,7 +30,6 @@ export const metadata: Metadata = {
   },
 };
 
-import Navbar from "@/components/layout/Navbar";
 import LocationHeader from "@/components/layout/LocationHeader";
 import BottomNav from "@/components/layout/BottomNav";
 import ReduxProvider from "@/components/providers/ReduxProvider";
@@ -49,12 +48,9 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <ThemeProvider>
-            <div className="md:hidden">
-              <LocationHeader />
-            </div>
-            <Navbar />
+            <LocationHeader />
 
-            <main className="min-h-screen">
+            <main className="min-h-screen pt-14 md:pt-16">
               {children}
             </main>
 

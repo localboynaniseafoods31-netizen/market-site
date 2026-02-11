@@ -51,50 +51,65 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             );
         }
 
-        // Call Nominatim API (OpenStreetMap - free, requires User-Agent)
-        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`;
+        // Try BigDataCloud first, then Nominatim as fallback (better for India pincodes)
+        let pincode = '';
+        let locality = '';
+        let city = '';
+        let state = '';
+        let displayName = '';
 
-        const response = await fetch(nominatimUrl, {
-            headers: {
-                'User-Agent': 'Localboynaniseafoods/1.0 (hello@localboynaniseafoods.com)',
-                'Accept-Language': 'en',
-            },
-            // Cache for 1 hour
-            next: { revalidate: 3600 },
-        });
-
-        if (!response.ok) {
-            console.error('Nominatim API error:', response.status);
-            return NextResponse.json(
-                { error: 'Geocoding service unavailable' },
-                { status: 503 }
-            );
+        const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+        try {
+            const response = await fetch(bdcUrl, {
+                next: { revalidate: 3600 },
+                headers: { 'Accept': 'application/json' },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                pincode = data.postcode || '';
+                locality = data.locality || data.principalSubdivision || '';
+                city = data.city || data.locality || '';
+                state = data.principalSubdivision || '';
+                displayName = [locality, city].filter(Boolean).join(', ');
+            }
+        } catch (e) {
+            console.warn('BigDataCloud geocode failed, trying Nominatim', e);
         }
 
-        const data: NominatimResponse = await response.json();
-
-        if (!data.address) {
-            return NextResponse.json(
-                { error: 'Location not found' },
-                { status: 404 }
-            );
+        // Fallback: Nominatim reverse (reliable for India, used by location search)
+        if (!pincode || !locality) {
+            const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+            const nomRes = await fetch(nominatimUrl, {
+                headers: {
+                    'User-Agent': 'Localboynaniseafoods/1.0 (delivery location)',
+                    'Accept-Language': 'en',
+                },
+                next: { revalidate: 3600 },
+            });
+            if (nomRes.ok) {
+                const nomData = await nomRes.json();
+                const addr = nomData?.address || {};
+                pincode = pincode || addr.postcode || addr.pincode || '';
+                locality = locality || addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city_district || '';
+                city = city || addr.city || addr.town || addr.village || addr.state_district || '';
+                state = state || addr.state || '';
+                if (!displayName) displayName = [locality, city].filter(Boolean).join(', ') || nomData?.display_name || '';
+            }
         }
 
-        const { address } = data;
-
-        // Extract information
-        const pincode = address.postcode || null;
-        const locality = address.suburb || address.neighbourhood || address.village || '';
-        const city = address.city || address.town || address.village || '';
-        const state = address.state || '';
-        const displayName = data.display_name || `${locality}, ${city}`;
+        if (!pincode) {
+            return NextResponse.json(
+                { error: 'Could not determine pincode for this location. Try selecting a different area or enter pincode manually.' },
+                { status: 422 }
+            );
+        }
 
         const result: GeocodeResult = {
             pincode,
-            locality: locality.slice(0, 30), // Truncate for display
-            city,
-            state,
-            displayName: displayName.split(',').slice(0, 3).join(', '), // First 3 parts only
+            locality: (locality || 'Unknown').slice(0, 30),
+            city: city || '',
+            state: state || '',
+            displayName: displayName || locality || city || 'Unknown',
         };
 
         return NextResponse.json(result);

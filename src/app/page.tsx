@@ -98,6 +98,7 @@ export default async function V2Page() {
         sourcing: p.sourcing || undefined,
         cutType: p.cutType || undefined,
         texture: p.texture || undefined,
+        stock: p.stock,
     }));
 
     // Filter Deals

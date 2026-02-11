@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
                     total,
                     deliveryName: name,
                     deliveryPhone: phone,
+                    deliveryEmail: email, // Save email to order
                     deliveryAddress: address,
                     deliveryCity: city,
                     deliveryPincode: pincode,

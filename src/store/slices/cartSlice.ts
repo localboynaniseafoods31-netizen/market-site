@@ -12,6 +12,7 @@ export interface CartItem {
         originalPrice?: number;
         image: string;
         weight: string;
+        stock?: number;
     };
 }
 
@@ -42,6 +43,7 @@ const cartSlice = createSlice({
                         originalPrice: product.originalPrice,
                         image: product.image,
                         weight: product.netWeight || product.grossWeight,
+                        stock: product.stock,
                     };
                 }
             } else {
@@ -54,6 +56,7 @@ const cartSlice = createSlice({
                         originalPrice: product.originalPrice,
                         image: product.image,
                         weight: product.netWeight || product.grossWeight,
+                        stock: product.stock,
                     } : undefined
                 });
             }
