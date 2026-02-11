@@ -29,7 +29,7 @@ export default function FloatingCartSummary() {
                             <div className="flex flex-col">
                                 <span className="text-xs font-medium opacity-90">{count} ITEM{count > 1 ? 'S' : ''}</span>
                                 <div className="font-bold text-sm flex items-center gap-1">
-                                    ₹{total}
+                                    ₹{total / 100}
                                     <span className="text-[10px] font-normal opacity-70">plus taxes</span>
                                 </div>
                             </div>

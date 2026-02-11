@@ -63,9 +63,9 @@ export default function ProductCard({
                 <div className="flex items-end justify-between mt-3 gap-2">
                     <div className="flex flex-col">
                         {originalPrice && (
-                            <span className="text-[10px] text-muted-foreground line-through">₹{originalPrice}</span>
+                            <span className="text-[10px] text-muted-foreground line-through">₹{originalPrice / 100}</span>
                         )}
-                        <span className="font-bold text-base md:text-lg text-primary">₹{price}</span>
+                        <span className="font-bold text-base md:text-lg text-primary">₹{price / 100}</span>
                     </div>
 
                     {quantity === 0 ? (

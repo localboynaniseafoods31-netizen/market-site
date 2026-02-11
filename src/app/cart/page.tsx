@@ -21,9 +21,13 @@ import {
 export default function CartPage() {
     const dispatch = useAppDispatch();
     const cartItems = useAppSelector(selectCartItemsWithDetails);
-    const cartTotal = useAppSelector(selectCartTotal);
-    const cartSavings = useAppSelector(selectCartSavings);
+    const rawCartTotal = useAppSelector(selectCartTotal);
+    const rawCartSavings = useAppSelector(selectCartSavings);
     const itemCount = useAppSelector(selectCartItemCount);
+
+    // Convert to Rupees for display and logic
+    const cartTotal = rawCartTotal / 100;
+    const cartSavings = rawCartSavings / 100;
 
     const deliveryFee = cartTotal >= 500 ? 0 : 49; // Free delivery above ₹500
     const finalTotal = cartTotal + deliveryFee;
@@ -105,10 +109,10 @@ export default function CartPage() {
                                         <div className="flex flex-wrap items-center justify-between mt-2 gap-y-2">
                                             {/* Price */}
                                             <div className="flex items-baseline gap-2">
-                                                <span className="font-bold text-foreground">₹{item.lineTotal}</span>
+                                                <span className="font-bold text-foreground">₹{item.lineTotal / 100}</span>
                                                 {item.product?.originalPrice && (
                                                     <span className="text-xs text-muted-foreground line-through">
-                                                        ₹{item.product.originalPrice * item.quantity}
+                                                        ₹{(item.product.originalPrice * item.quantity) / 100}
                                                     </span>
                                                 )}
                                             </div>

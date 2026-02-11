@@ -95,11 +95,11 @@ export default function EnhancedProductCard(product: EnhancedProductCardProps) {
                 {/* Price Section */}
                 <div className="flex items-center gap-1.5 mb-3">
                     <span className="text-sm md:text-base font-bold text-foreground">
-                        ₹{product.price}
+                        ₹{product.price / 100}
                     </span>
                     {product.originalPrice && (
                         <span className="text-xs text-slate-400 line-through font-medium">
-                            ₹{product.originalPrice}
+                            ₹{product.originalPrice / 100}
                         </span>
                     )}
                     {product.offerPercentage && (

@@ -100,10 +100,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             {/* Price & Action */}
             <div className="bg-card rounded-2xl border-2 border-border p-6 md:sticky md:top-24 shadow-sm">
                 <div className="flex items-end gap-3 mb-6">
-                    <span className="text-3xl font-black text-foreground">₹{product.price}</span>
+                    <span className="text-3xl font-black text-foreground">₹{product.price / 100}</span>
                     {product.originalPrice && (
                         <>
-                            <span className="text-lg text-slate-400 line-through mb-1">₹{product.originalPrice}</span>
+                            <span className="text-lg text-slate-400 line-through mb-1">₹{product.originalPrice / 100}</span>
                             <span className="text-sm font-bold text-green-600 mb-1 bg-green-50 px-2 py-0.5 rounded-full">
                                 {discount}% OFF
                             </span>
