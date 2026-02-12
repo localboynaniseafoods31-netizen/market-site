@@ -20,8 +20,9 @@ import {
     addAddress,
     createOrder,
     clearCart,
+    selectCartWeight,
 } from "@/store";
-import { DELIVERY_FEE, DELIVERY_FREE_THRESHOLD } from "@/config/constants";
+import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
 
 type CheckoutStep = 'details' | 'address' | 'confirm';
 
@@ -38,8 +39,13 @@ const loadRazorpayScript = () => {
 export default function CheckoutPage() {
     const dispatch = useAppDispatch();
     const cartItems = useAppSelector(selectCartItemsWithDetails);
-    const cartTotal = useAppSelector(selectCartTotal);
-    const cartSavings = useAppSelector(selectCartSavings);
+    const rawCartTotal = useAppSelector(selectCartTotal);
+    const rawCartSavings = useAppSelector(selectCartSavings);
+
+    // Convert to Rupees
+    const cartTotal = rawCartTotal / 100;
+    const cartSavings = rawCartSavings / 100;
+
     const user = useAppSelector(selectUser);
     const defaultAddress = useAppSelector(selectDefaultAddress);
 
@@ -60,7 +66,9 @@ export default function CheckoutPage() {
 
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const deliveryFee = cartTotal >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_FEE;
+    // Verify these selectors exist!
+    const cartWeight = useAppSelector(selectCartWeight);
+    const deliveryFee = cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : DELIVERY_FEE;
     const finalTotal = cartTotal + deliveryFee;
 
     // Validate phone (10 digits)

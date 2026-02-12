@@ -17,8 +17,9 @@ import {
     removeFromCart,
     clearCart,
     selectIsServiceable,
+    selectCartWeight,
 } from "@/store";
-import { DELIVERY_FEE, DELIVERY_FREE_THRESHOLD } from "@/config/constants";
+import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
 
 export default function CartPage() {
     const dispatch = useAppDispatch();
@@ -32,7 +33,9 @@ export default function CartPage() {
     const cartTotal = rawCartTotal / 100;
     const cartSavings = rawCartSavings / 100;
 
-    const deliveryFee = cartTotal >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_FEE; // Free delivery above threshold
+    // Weight-based shipping (Free if >= 20kg)
+    const cartWeight = useAppSelector(selectCartWeight);
+    const deliveryFee = cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : DELIVERY_FEE;
     const finalTotal = cartTotal + deliveryFee;
 
     if (cartItems.length === 0) {
@@ -182,7 +185,7 @@ export default function CartPage() {
                                 </div>
                                 {deliveryFee > 0 && (
                                     <p className="text-xs text-muted-foreground bg-slate-50 p-2 rounded-lg">
-                                        Add ₹{DELIVERY_FREE_THRESHOLD - cartTotal} more for free delivery
+                                        Add {(DELIVERY_FREE_WEIGHT_THRESHOLD_KG - cartWeight).toFixed(1)}kg more for free delivery
                                     </p>
                                 )}
                             </div>

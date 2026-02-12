@@ -1,5 +1,5 @@
 import type { RootState } from './store';
-import { getProductById, calculateCartTotal, calculateCartSavings } from './helpers';
+import { getProductById, calculateCartTotal, calculateCartSavings, parseWeight } from './helpers';
 import type { CartItem } from './slices/cartSlice';
 import type { Address } from './slices/userSlice';
 import type { Order } from './slices/orderSlice';
@@ -98,6 +98,22 @@ export const selectIsInCart = (productId: string) => (state: RootState): boolean
 export const selectProductQuantity = (productId: string) => (state: RootState): number => {
     const item = state.cart.items.find((item: CartItem) => item.productId === productId);
     return item?.quantity || 0;
+};
+
+/**
+ * Get total weight of cart items in KG
+ */
+export const selectCartWeight = (state: RootState): number => {
+    return state.cart.items.reduce((sum, item) => {
+        const product = getProductById(item.productId);
+        // Note: productSnapshot doesn't have weight? It does: weight: string
+        const weightStr = product ? (product.netWeight || product.grossWeight) : item.productSnapshot?.weight;
+
+        if (!weightStr) return sum;
+
+        const weightKg = parseWeight(weightStr);
+        return sum + (weightKg * item.quantity);
+    }, 0);
 };
 
 // ==================== USER SELECTORS ====================

@@ -66,6 +66,7 @@ export {
     selectOrderById,
     selectRecentOrders,
     selectActiveOrders,
+    selectCartWeight,
 } from './selectors';
 
 // Types
