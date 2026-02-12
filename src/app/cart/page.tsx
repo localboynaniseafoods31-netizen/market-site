@@ -18,6 +18,7 @@ import {
     clearCart,
     selectIsServiceable,
 } from "@/store";
+import { DELIVERY_FEE, DELIVERY_FREE_THRESHOLD } from "@/config/constants";
 
 export default function CartPage() {
     const dispatch = useAppDispatch();
@@ -31,7 +32,7 @@ export default function CartPage() {
     const cartTotal = rawCartTotal / 100;
     const cartSavings = rawCartSavings / 100;
 
-    const deliveryFee = cartTotal >= 500 ? 0 : 49; // Free delivery above ₹500
+    const deliveryFee = cartTotal >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_FEE; // Free delivery above threshold
     const finalTotal = cartTotal + deliveryFee;
 
     if (cartItems.length === 0) {
@@ -181,7 +182,7 @@ export default function CartPage() {
                                 </div>
                                 {deliveryFee > 0 && (
                                     <p className="text-xs text-muted-foreground bg-slate-50 p-2 rounded-lg">
-                                        Add ₹{500 - cartTotal} more for free delivery
+                                        Add ₹{DELIVERY_FREE_THRESHOLD - cartTotal} more for free delivery
                                     </p>
                                 )}
                             </div>

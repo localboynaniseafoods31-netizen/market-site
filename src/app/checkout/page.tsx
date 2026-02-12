@@ -21,6 +21,7 @@ import {
     createOrder,
     clearCart,
 } from "@/store";
+import { DELIVERY_FEE, DELIVERY_FREE_THRESHOLD } from "@/config/constants";
 
 type CheckoutStep = 'details' | 'address' | 'confirm';
 
@@ -59,7 +60,7 @@ export default function CheckoutPage() {
 
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const deliveryFee = cartTotal >= 500 ? 0 : 49;
+    const deliveryFee = cartTotal >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_FEE;
     const finalTotal = cartTotal + deliveryFee;
 
     // Validate phone (10 digits)
