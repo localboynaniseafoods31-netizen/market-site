@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Phone, User, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import {
     selectLocation,
 } from "@/store";
 import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
-import { checkDeliveryAvailability } from "@/data/deliveryZones";
+import { checkDeliveryAvailability, DELIVERY_ZONES } from "@/data/deliveryZones";
 
 type CheckoutStep = 'details' | 'address' | 'confirm';
 
@@ -144,6 +144,7 @@ export default function CheckoutPage() {
     const deliveryFee = cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : baseDeliveryFee;
     const finalTotal = cartTotal + deliveryFee;
     const expectedCity = deliveryCheck.zone?.locality;
+    const isCityAutoLocked = addressInput.pincode.length === 6 && deliveryCheck.available && !!expectedCity;
     // Case-insensitive check, allowing for minor differences if needed, but strict based on prompt requirements
     const isCityMatching = !expectedCity || (addressInput.city.trim().toLowerCase() === expectedCity.toLowerCase());
 
@@ -152,6 +153,38 @@ export default function CheckoutPage() {
         addressInput.city.length > 2 &&
         isCityMatching &&
         deliveryCheck.available;
+
+    const pincodeSuggestions = useMemo(() => {
+        if (!addressInput.pincode) return DELIVERY_ZONES.slice(0, 15).map(z => z.pincode);
+        const seen = new Set<string>();
+        return DELIVERY_ZONES
+            .filter(z => z.pincode.startsWith(addressInput.pincode))
+            .map(z => z.pincode)
+            .filter((pin) => {
+                if (seen.has(pin)) return false;
+                seen.add(pin);
+                return true;
+            })
+            .slice(0, 15);
+    }, [addressInput.pincode]);
+
+    const citySuggestions = useMemo(() => {
+        const cityInput = addressInput.city.trim().toLowerCase();
+        const source = addressInput.pincode
+            ? DELIVERY_ZONES.filter(z => z.pincode.startsWith(addressInput.pincode))
+            : DELIVERY_ZONES;
+        const seen = new Set<string>();
+        return source
+            .map(z => z.locality)
+            .filter((city) => {
+                const key = city.toLowerCase();
+                if (seen.has(key)) return false;
+                seen.add(key);
+                if (!cityInput) return true;
+                return key.startsWith(cityInput);
+            })
+            .slice(0, 15);
+    }, [addressInput.pincode, addressInput.city]);
 
     // Auto-fill logic
     const handlePhoneBlur = async () => {
@@ -586,8 +619,14 @@ export default function CheckoutPage() {
                                             value={addressInput.pincode}
                                             onChange={(e) => setAddressInput(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
                                             className={`mt-1 ${(addressInput.pincode.length === 6 && !deliveryCheck.available) ? 'border-red-500' : ''}`}
+                                            list="pincode-suggestions"
                                             maxLength={6}
                                         />
+                                        <datalist id="pincode-suggestions">
+                                            {pincodeSuggestions.map((pin) => (
+                                                <option key={pin} value={pin} />
+                                            ))}
+                                        </datalist>
                                         {addressInput.pincode.length === 6 && !deliveryCheck.available && (
                                             <p className="text-xs text-red-500 mt-1">
                                                 We do not deliver to this pincode yet.
@@ -601,7 +640,19 @@ export default function CheckoutPage() {
                                             value={addressInput.city}
                                             onChange={(e) => setAddressInput(prev => ({ ...prev, city: e.target.value }))}
                                             className={`mt-1 ${!isCityMatching && addressInput.city ? 'border-red-500' : ''}`}
+                                            list="city-suggestions"
+                                            readOnly={isCityAutoLocked}
                                         />
+                                        <datalist id="city-suggestions">
+                                            {citySuggestions.map((city) => (
+                                                <option key={city} value={city} />
+                                            ))}
+                                        </datalist>
+                                        {isCityAutoLocked && (
+                                            <p className="text-xs text-slate-600 mt-1">
+                                                City auto-selected from pincode.
+                                            </p>
+                                        )}
                                         {!isCityMatching && addressInput.city && (
                                             <p className="text-xs text-red-500 mt-1">
                                                 City name must be &apos;{expectedCity}&apos; for this pincode.

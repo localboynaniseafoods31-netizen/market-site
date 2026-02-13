@@ -58,10 +58,18 @@ export default function AdminDashboard() {
         return <div className="text-center text-muted-foreground">Failed to load dashboard</div>;
     }
 
+    const formatInr = (value: number) =>
+        new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+        }).format(value);
+
     const stats = [
         {
             label: "Today's Sales",
-            value: `₹${data.summary.todaySales.toLocaleString()}`,
+            value: formatInr(data.summary.todaySales),
             sub: `${data.summary.todayOrders} orders`,
             icon: IndianRupee,
             color: 'text-green-500',
@@ -69,7 +77,7 @@ export default function AdminDashboard() {
         },
         {
             label: "This Week",
-            value: `₹${data.summary.weekSales.toLocaleString()}`,
+            value: formatInr(data.summary.weekSales),
             sub: `${data.summary.weekOrders} orders`,
             icon: TrendingUp,
             color: 'text-blue-500',
@@ -139,7 +147,7 @@ export default function AdminDashboard() {
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="font-bold">₹{order.total}</p>
+                                <p className="font-bold">{formatInr(order.total)}</p>
                                 <span
                                     className={`text-xs px-2 py-1 rounded-full ${order.status === 'DELIVERED'
                                         ? 'bg-green-100 text-green-700'
