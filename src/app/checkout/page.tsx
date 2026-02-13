@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Phone, User, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,61 @@ import {
     createOrder,
     clearCart,
     selectCartWeight,
+    selectLocation,
 } from "@/store";
 import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
+import { checkDeliveryAvailability } from "@/data/deliveryZones";
 
 type CheckoutStep = 'details' | 'address' | 'confirm';
 
+type CheckoutCartItem = {
+    productId: string;
+    quantity: number;
+    lineTotal: number;
+    product?: {
+        title?: string;
+        price?: number;
+    } | null;
+};
+
+type RazorpaySuccessResponse = {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+};
+
+type RazorpayOptions = {
+    key: string;
+    amount: number;
+    currency: string;
+    name: string;
+    description: string;
+    order_id: string;
+    handler: (response: RazorpaySuccessResponse) => Promise<void>;
+    modal: {
+        ondismiss: () => Promise<void>;
+    };
+    prefill: {
+        name: string;
+        contact: string;
+    };
+    theme: {
+        color: string;
+    };
+};
+
+type RazorpayInstance = {
+    open: () => void;
+};
+
+declare global {
+    interface Window {
+        Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+    }
+}
+
 const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
         const script = document.createElement("script");
         script.src = "https://checkout.razorpay.com/v1/checkout.js";
         script.onload = () => resolve(true);
@@ -48,6 +96,7 @@ export default function CheckoutPage() {
 
     const user = useAppSelector(selectUser);
     const defaultAddress = useAppSelector(selectDefaultAddress);
+    const locationState = useAppSelector(selectLocation); // Get selected location
 
     const [step, setStep] = useState<CheckoutStep>('details');
     const [phone, setPhoneInput] = useState(user.phone || '');
@@ -56,7 +105,7 @@ export default function CheckoutPage() {
     const [addressInput, setAddressInput] = useState({
         fullAddress: defaultAddress?.fullAddress || '',
         landmark: defaultAddress?.landmark || '',
-        pincode: defaultAddress?.pincode || '',
+        pincode: defaultAddress?.pincode || locationState?.pincode || '', // Pre-fill from location
         city: defaultAddress?.city || '',
     });
     const [isOrderPlaced, setIsOrderPlaced] = useState(false);
@@ -65,6 +114,20 @@ export default function CheckoutPage() {
     const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
 
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // Pincode Autofill Effect
+    useEffect(() => {
+        const pincode = addressInput.pincode;
+        if (pincode.length === 6) {
+            const check = checkDeliveryAvailability(pincode);
+            if (check.available && check.zone) {
+                setAddressInput(prev => ({
+                    ...prev,
+                    city: check.zone!.locality
+                }));
+            }
+        }
+    }, [addressInput.pincode]);
 
     // Verify these selectors exist!
     const cartWeight = useAppSelector(selectCartWeight);
@@ -75,7 +138,23 @@ export default function CheckoutPage() {
     const isPhoneValid = /^[6-9]\d{9}$/.test(phone);
     const isNameValid = name.trim().length >= 2;
     const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Optional but must be valid if present
-    const isAddressValid = addressInput.fullAddress.length > 5 && addressInput.pincode.length === 6;
+
+
+
+    // Validate that address matches selected location
+    // Validate City against Pincode
+    const deliveryCheck = checkDeliveryAvailability(addressInput.pincode);
+    const expectedCity = deliveryCheck.zone?.locality;
+    const minOrderAmount = deliveryCheck.zone?.minOrder ?? 0;
+    const isMinOrderMet = !deliveryCheck.available || finalTotal >= minOrderAmount;
+    // Case-insensitive check, allowing for minor differences if needed, but strict based on prompt requirements
+    const isCityMatching = !expectedCity || (addressInput.city.trim().toLowerCase() === expectedCity.toLowerCase());
+
+    const isAddressValid = addressInput.fullAddress.length > 5 &&
+        addressInput.pincode.length === 6 &&
+        addressInput.city.length > 2 &&
+        isCityMatching &&
+        deliveryCheck.available;
 
     // Auto-fill logic
     const handlePhoneBlur = async () => {
@@ -124,6 +203,16 @@ export default function CheckoutPage() {
         }
     };
     const handlePayment = async () => {
+        if (!deliveryCheck.available || !isCityMatching) {
+            alert('Please provide a valid serviceable delivery address.');
+            return;
+        }
+
+        if (!isMinOrderMet) {
+            alert(`Minimum order for this area is ₹${minOrderAmount}.`);
+            return;
+        }
+
         setIsProcessing(true);
 
         // 1. Load Razorpay SDK
@@ -136,14 +225,14 @@ export default function CheckoutPage() {
 
         // 2. Create Order in DB (PENDING)
         const orderPayload = {
-            items: cartItems.map((item: any) => ({
+            items: cartItems.map((item: CheckoutCartItem) => ({
                 productId: item.productId,
                 quantity: item.quantity,
                 priceAtOrder: item.product?.price || 0,
             })),
-            subtotal: cartTotal,
-            deliveryFee,
-            total: finalTotal,
+            subtotal: Math.round(cartTotal * 100),
+            deliveryFee: Math.round(deliveryFee * 100),
+            total: Math.round(finalTotal * 100),
             phone,
             name,
             email, // Send email to API
@@ -168,12 +257,18 @@ export default function CheckoutPage() {
             }
 
             const dbOrderId = data.orderId; // UUID
+            const paymentInitToken = data.paymentInitToken as string | undefined;
+            if (!paymentInitToken) {
+                alert('Payment init token missing. Please try again.');
+                setIsProcessing(false);
+                return;
+            }
 
             // 3. Create Razorpay Order
             const paymentRes = await fetch('/api/payment/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderId: dbOrderId }),
+                body: JSON.stringify({ orderId: dbOrderId, paymentInitToken }),
             });
 
             const paymentData = await paymentRes.json();
@@ -183,6 +278,7 @@ export default function CheckoutPage() {
                 setIsProcessing(false);
                 return;
             }
+            const failureToken = paymentData.failureToken as string | undefined;
 
             // 4. Open Razorpay Modal
             const options = {
@@ -192,7 +288,7 @@ export default function CheckoutPage() {
                 name: "Localboynaniseafoods",
                 description: "Premium Seafood Order",
                 order_id: paymentData.id,
-                handler: async function (response: any) {
+                handler: async function (response: RazorpaySuccessResponse) {
                     // 5. Verify Payment
                     try {
                         const verifyRes = await fetch('/api/payment/verify', {
@@ -217,6 +313,25 @@ export default function CheckoutPage() {
                         alert('Payment verification error');
                     }
                 },
+                modal: {
+                    ondismiss: async function () {
+                        setIsProcessing(false);
+                        alert("Payment cancelled. You can retry payment from the orders page or try again here.");
+
+                        // Call failure API to mark order as failed/cancelled
+                        try {
+                            if (failureToken) {
+                                await fetch('/api/payment/failure', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ orderId: dbOrderId, failureToken }),
+                                });
+                            }
+                        } catch (err) {
+                            console.error('Failed to report payment cancellation', err);
+                        }
+                    }
+                },
                 prefill: {
                     name: name,
                     contact: phone,
@@ -224,15 +339,16 @@ export default function CheckoutPage() {
                 theme: {
                     color: "#0284c7", // Sky blue
                 },
-                modal: {
-                    ondismiss: function () {
-                        setIsProcessing(false);
-                        alert('Payment cancelled. You can try again.');
-                    }
-                }
+
             };
 
-            const rzp = new (window as any).Razorpay(options);
+            const RazorpayCtor = window.Razorpay;
+            if (!RazorpayCtor) {
+                alert('Payment gateway unavailable. Please refresh and try again.');
+                setIsProcessing(false);
+                return;
+            }
+            const rzp = new RazorpayCtor(options);
             rzp.open();
 
         } catch (error) {
@@ -245,10 +361,10 @@ export default function CheckoutPage() {
     const handleOrderSuccess = (orderNumber: string, invoice?: string) => {
         // Clear Cart & Redux
         dispatch(createOrder({
-            items: cartItems.map((item: any) => ({
+            items: cartItems.map((item: CheckoutCartItem) => ({
                 productId: item.productId,
                 quantity: item.quantity,
-                priceAtOrder: item.product?.price || 0,
+                priceAtOrder: (item.product?.price || 0) / 100,
                 title: item.product?.title || '',
             })),
             subtotal: cartTotal,
@@ -471,26 +587,41 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
+                                    <div className="relative">
                                         <Label className="text-sm font-medium text-slate-700">Pincode</Label>
                                         <Input
                                             placeholder="6 digits"
                                             value={addressInput.pincode}
                                             onChange={(e) => setAddressInput(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
-                                            className="mt-1"
+                                            className={`mt-1 ${(addressInput.pincode.length === 6 && !deliveryCheck.available) ? 'border-red-500' : ''}`}
                                             maxLength={6}
                                         />
+                                        {addressInput.pincode.length === 6 && !deliveryCheck.available && (
+                                            <p className="text-xs text-red-500 mt-1">
+                                                We do not deliver to this pincode yet.
+                                            </p>
+                                        )}
                                     </div>
-                                    <div>
+                                    <div className="relative">
                                         <Label className="text-sm font-medium text-slate-700">City</Label>
                                         <Input
                                             placeholder="City"
                                             value={addressInput.city}
                                             onChange={(e) => setAddressInput(prev => ({ ...prev, city: e.target.value }))}
-                                            className="mt-1"
+                                            className={`mt-1 ${!isCityMatching && addressInput.city ? 'border-red-500' : ''}`}
                                         />
+                                        {!isCityMatching && addressInput.city && (
+                                            <p className="text-xs text-red-500 mt-1">
+                                                City name must be &apos;{expectedCity}&apos; for this pincode.
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
+                                {deliveryCheck.available && minOrderAmount > 0 && (
+                                    <p className="text-xs text-slate-600">
+                                        Minimum order for this area: ₹{minOrderAmount}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-3 mt-6">
@@ -522,10 +653,10 @@ export default function CheckoutPage() {
                                 <h2 className="text-xl font-bold text-slate-900 mb-4">Order Summary</h2>
 
                                 <div className="space-y-3 text-sm border-b border-slate-100 pb-4 mb-4">
-                                    {cartItems.map((item: any) => (
+                                    {cartItems.map((item: CheckoutCartItem) => (
                                         <div key={item.productId} className="flex justify-between">
                                             <span className="text-slate-600">{item.product?.title} × {item.quantity}</span>
-                                            <span className="font-medium">₹{item.lineTotal}</span>
+                                            <span className="font-medium">₹{item.lineTotal / 100}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -559,6 +690,11 @@ export default function CheckoutPage() {
                                 <p className="text-sm text-slate-600">{phone}</p>
                                 <p className="text-sm text-slate-600 mt-2">{addressInput.fullAddress}</p>
                                 <p className="text-sm text-slate-600">{addressInput.city} - {addressInput.pincode}</p>
+                                {deliveryCheck.available && minOrderAmount > 0 && !isMinOrderMet && (
+                                    <p className="text-sm text-red-600 mt-3">
+                                        Add items worth ₹{Math.max(0, minOrderAmount - finalTotal)} more to meet the area minimum order.
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex gap-3">
@@ -567,7 +703,7 @@ export default function CheckoutPage() {
                                 </Button>
                                 <Button
                                     onClick={handlePayment}
-                                    disabled={isProcessing}
+                                    disabled={isProcessing || !isMinOrderMet}
                                     className="flex-1 h-12 rounded-full font-bold text-lg bg-sky-600 hover:bg-sky-700"
                                 >
                                     {isProcessing ? 'Processing...' : 'Pay Now'}
@@ -577,6 +713,6 @@ export default function CheckoutPage() {
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </div >
     );
 }

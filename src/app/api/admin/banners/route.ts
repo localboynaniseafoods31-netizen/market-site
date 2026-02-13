@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requireAdmin } from '@/lib/admin';
 
 // GET: List all banners
 export async function GET() {
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response!;
+
     const banners = await prisma.saleBanner.findMany({
         orderBy: { position: 'asc' },
     });
@@ -13,10 +16,8 @@ export async function GET() {
 
 // POST: Create new banner
 export async function POST(req: NextRequest) {
-    const session = await auth();
-    if (!session || (session.user as any).role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response!;
 
     const body = await req.json();
     const { title, imageUrl, linkUrl, isActive, position, startDate, endDate } = body;
@@ -42,10 +43,8 @@ export async function POST(req: NextRequest) {
 
 // PUT: Update banner
 export async function PUT(req: NextRequest) {
-    const session = await auth();
-    if (!session || (session.user as any).role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response!;
 
     const body = await req.json();
     const { id, ...data } = body;
@@ -68,10 +67,8 @@ export async function PUT(req: NextRequest) {
 
 // DELETE: Remove banner
 export async function DELETE(req: NextRequest) {
-    const session = await auth();
-    if (!session || (session.user as any).role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const adminCheck = await requireAdmin();
+    if (!adminCheck.authorized) return adminCheck.response!;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

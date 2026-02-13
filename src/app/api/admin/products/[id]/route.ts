@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import { requireAdmin } from '@/lib/admin';
 import { successResponse, errorResponse, handleApiError } from '@/lib/api-response';
 import { updateProductSchema } from '@/lib/validations';
@@ -53,12 +54,17 @@ export async function PATCH(
         }
 
         // Convert prices to paisa if provided
-        const updateData: any = { ...input };
+        const updateData: Prisma.ProductUncheckedUpdateInput = { ...input };
         if (input.price !== undefined) {
             updateData.price = input.price * 100;
         }
         if (input.originalPrice !== undefined) {
             updateData.originalPrice = input.originalPrice ? input.originalPrice * 100 : null;
+        }
+        const effectivePrice = updateData.price ?? existing.price;
+        const effectiveOriginalPrice = updateData.originalPrice ?? existing.originalPrice;
+        if (effectiveOriginalPrice !== null && effectiveOriginalPrice <= effectivePrice) {
+            return errorResponse('VALIDATION_ERROR', 'Original price must be greater than price', 400);
         }
 
         const product = await prisma.$transaction(async (tx) => {

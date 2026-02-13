@@ -25,6 +25,14 @@ const statusColors: Record<string, string> = {
     CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 };
 
+const escapeHtml = (input: unknown): string =>
+    String(input ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+
 export default function AdminOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -70,14 +78,14 @@ export default function AdminOrdersPage() {
             if (invoiceWindow) {
                 invoiceWindow.document.write(`
           <html>
-          <head><title>Invoice ${data.data.invoiceNumber}</title></head>
+          <head><title>Invoice ${escapeHtml(data.data.invoiceNumber)}</title></head>
           <body style="font-family: sans-serif; padding: 20px;">
-            <h1>Invoice: ${data.data.invoiceNumber}</h1>
-            <p>Order: ${data.data.orderNumber}</p>
+            <h1>Invoice: ${escapeHtml(data.data.invoiceNumber)}</h1>
+            <p>Order: ${escapeHtml(data.data.orderNumber)}</p>
             <p>Date: ${new Date(data.data.orderDate).toLocaleDateString()}</p>
             <hr/>
             <h3>Customer</h3>
-            <p>${data.data.customer.name}<br/>${data.data.customer.phone}<br/>${data.data.customer.address}, ${data.data.customer.city} - ${data.data.customer.pincode}</p>
+            <p>${escapeHtml(data.data.customer.name)}<br/>${escapeHtml(data.data.customer.phone)}<br/>${escapeHtml(data.data.customer.address)}, ${escapeHtml(data.data.customer.city)} - ${escapeHtml(data.data.customer.pincode)}</p>
             <hr/>
             <h3>Items</h3>
             <table style="width:100%; border-collapse: collapse;">
@@ -87,12 +95,12 @@ export default function AdminOrdersPage() {
                 <th style="padding:8px;">Rate</th>
                 <th style="padding:8px;">Amount</th>
               </tr>
-              ${data.data.items.map((item: any) => `
+              ${data.data.items.map((item: { name: string; quantity: number; rate: number; amount: number }) => `
                 <tr>
-                  <td style="padding:8px;">${item.name}</td>
-                  <td style="padding:8px; text-align:center;">${item.quantity}</td>
-                  <td style="padding:8px; text-align:right;">₹${item.rate}</td>
-                  <td style="padding:8px; text-align:right;">₹${item.amount}</td>
+                  <td style="padding:8px;">${escapeHtml(item.name)}</td>
+                  <td style="padding:8px; text-align:center;">${escapeHtml(item.quantity)}</td>
+                  <td style="padding:8px; text-align:right;">₹${escapeHtml(item.rate)}</td>
+                  <td style="padding:8px; text-align:right;">₹${escapeHtml(item.amount)}</td>
                 </tr>
               `).join('')}
             </table>

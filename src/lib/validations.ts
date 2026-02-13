@@ -35,7 +35,7 @@ export const updateOrderStatusSchema = z.object({
 
 // ==================== Product Schemas ====================
 
-export const createProductSchema = z.object({
+const productSchemaBase = z.object({
     name: z.string().min(2).max(200),
     slug: z.string().regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens'),
     description: z.string().max(2000).optional(),
@@ -43,7 +43,7 @@ export const createProductSchema = z.object({
     images: z.array(z.string()).default([]),
     grossWeight: z.string().min(1),
     netWeight: z.string().min(1),
-    price: z.number().int().min(100), // Minimum ₹1 (100 paisa)
+    price: z.number().int().min(1), // Minimum ₹1 (input is rupees in admin forms)
     originalPrice: z.number().int().optional(),
     stock: z.number().int().min(0).default(0),
     pieces: z.string().optional(),
@@ -55,7 +55,15 @@ export const createProductSchema = z.object({
     categoryId: z.string().uuid(),
 });
 
-export const updateProductSchema = createProductSchema.partial();
+export const createProductSchema = productSchemaBase.refine(
+    (data) => data.originalPrice === undefined || data.originalPrice > data.price,
+    { message: 'Original price must be greater than price', path: ['originalPrice'] }
+);
+
+export const updateProductSchema = productSchemaBase.partial().refine(
+    (data) => data.originalPrice === undefined || data.price === undefined || data.originalPrice > data.price,
+    { message: 'Original price must be greater than price', path: ['originalPrice'] }
+);
 
 // ==================== Category Schemas ====================
 

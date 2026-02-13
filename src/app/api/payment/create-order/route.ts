@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getRazorpay, CURRENCY } from '@/lib/razorpay';
+import { checkRateLimit, rateLimitExceededResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
-        const { orderId } = body;
+        const rateLimit = checkRateLimit(req, {
+            key: 'payment:create-order',
+            limit: 30,
+            windowMs: 60_000
+        });
+        if (!rateLimit.allowed) return rateLimitExceededResponse(rateLimit);
 
-        if (!orderId) {
-            return NextResponse.json({ error: 'Order ID required' }, { status: 400 });
+        const body = await req.json();
+        const { orderId, paymentInitToken } = body;
+
+        if (!orderId || !paymentInitToken) {
+            return NextResponse.json({ error: 'Order ID and payment token required' }, { status: 400 });
         }
 
         const order = await prisma.order.findUnique({
@@ -18,20 +26,30 @@ export async function POST(req: NextRequest) {
         if (!order) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
+        if (!order.idempotencyKey || order.idempotencyKey !== String(paymentInitToken)) {
+            return NextResponse.json({ error: 'Unauthorized payment init request' }, { status: 403 });
+        }
 
         if (order.paymentStatus === 'PAID') {
             return NextResponse.json({ error: 'Order already paid' }, { status: 400 });
         }
 
-        // Create Razorpay Order
+        if (order.status === 'CANCELLED') {
+            return NextResponse.json({ error: 'Order is cancelled' }, { status: 400 });
+        }
+
+        // Reuse existing pending Razorpay order for idempotency
+        if (order.paymentStatus === 'PENDING' && order.razorpayOrderId && order.idempotencyKey) {
+            return NextResponse.json({
+                id: order.razorpayOrderId,
+                currency: CURRENCY,
+                amount: order.total,
+                keyId: process.env.RAZORPAY_KEY_ID,
+                failureToken: order.idempotencyKey
+            });
+        }
+
         const payment_capture = 1;
-        const amount = order.total * 100; // Expected in paise (already stored in paise? No, total is in paise usually in your DB, check schema types)
-        // Schema says Int. In API response earlier total: order.total / 100 which implied stored in paise.
-        // Wait, earlier logic: "total: (product.price * 2) + 5000". Product price 72000 (720 INR).
-        // So total is stored in paise. Razorpay expects paise. 
-        // So we just use order.total directly. 
-        // DOUBLE CHECK: Razorpay docs say amount in smallest currency unit.
-        // If DB stores 72000 for 720Rs, then passing 72000 is correct.
 
         const options = {
             amount: order.total,
@@ -45,8 +63,8 @@ export async function POST(req: NextRequest) {
         };
 
         const razorpayOrder = await getRazorpay().orders.create(options);
+        const failureToken = order.idempotencyKey;
 
-        // Update Order with Razorpay Order ID
         await prisma.order.update({
             where: { id: orderId },
             data: {
@@ -59,7 +77,8 @@ export async function POST(req: NextRequest) {
             id: razorpayOrder.id,
             currency: razorpayOrder.currency,
             amount: razorpayOrder.amount,
-            keyId: process.env.RAZORPAY_KEY_ID // Send publishable key to frontend
+            keyId: process.env.RAZORPAY_KEY_ID,
+            failureToken
         });
 
     } catch (error) {

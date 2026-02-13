@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { Product } from "@/data/seafoodData";
 import {
     useAppDispatch,
@@ -13,21 +12,13 @@ import {
     incrementQuantity,
     decrementQuantity,
     selectProductQuantity,
-    selectIsServiceable
 } from "@/store";
 
-interface EnhancedProductCardProps extends Product { }
-
-export default function EnhancedProductCard(product: EnhancedProductCardProps) {
+export default function EnhancedProductCard(product: Product) {
     const dispatch = useAppDispatch();
     const quantity = useAppSelector(selectProductQuantity(product.id));
-    const isServiceable = useAppSelector(selectIsServiceable);
 
     const handleAdd = () => {
-        if (!isServiceable) {
-            // Optional: Show toast or rely on UI state
-            return;
-        }
         if (product.stock !== undefined && quantity >= product.stock) {
             return;
         }
@@ -41,13 +32,6 @@ export default function EnhancedProductCard(product: EnhancedProductCardProps) {
     const handleRemove = () => {
         dispatch(decrementQuantity(product.id));
     };
-
-    const displayPrice = product.price;
-    const displayOriginalPrice = product.originalPrice;
-
-    const discountAmount = displayOriginalPrice
-        ? displayOriginalPrice - displayPrice
-        : 0;
 
     return (
         <Link href={`/product/${product.id}`} className="group relative bg-card rounded-2xl border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300 flex flex-col h-full cursor-pointer">
@@ -137,10 +121,9 @@ export default function EnhancedProductCard(product: EnhancedProductCardProps) {
                         {quantity === 0 ? (
                             <Button
                                 onClick={(e) => { e.preventDefault(); handleAdd(); }}
-                                disabled={(product.stock !== undefined && product.stock === 0) || !isServiceable}
+                                disabled={(product.stock !== undefined && product.stock === 0)}
                                 size="sm"
                                 className="h-8 px-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-sm transition-all active:scale-95 border-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                title={!isServiceable ? "Not available in your location" : undefined}
                             >
                                 {product.stock !== undefined && product.stock === 0 ? "Out" : "Add"} <Plus className="ml-1 w-3 h-3" />
                             </Button>

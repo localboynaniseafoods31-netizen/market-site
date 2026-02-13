@@ -23,6 +23,8 @@ export async function GET() {
                 name: c.name,
                 description: c.description,
                 icon: c.icon,
+                dealPercentage: c.dealPercentage,
+                dealActive: c.dealActive,
                 productCount: c._count.products,
             }))
             .filter(c => c.productCount > 0);

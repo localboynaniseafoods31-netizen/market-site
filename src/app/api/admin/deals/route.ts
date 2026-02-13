@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireAdmin } from '@/lib/admin';
 
 // GET: List all CrazyDeals
 export async function GET() {
     try {
+        const adminCheck = await requireAdmin();
+        if (!adminCheck.authorized) return adminCheck.response!;
+
         const deals = await prisma.crazyDeal.findMany({
             orderBy: { position: 'asc' }
         });
@@ -17,6 +21,9 @@ export async function GET() {
 // POST: Create new CrazyDeal
 export async function POST(req: NextRequest) {
     try {
+        const adminCheck = await requireAdmin();
+        if (!adminCheck.authorized) return adminCheck.response!;
+
         const body = await req.json();
         const { title, subtitle, description, bgColor, imageUrl, promoCode, linkUrl, isActive, position } = body;
 
@@ -48,6 +55,9 @@ export async function POST(req: NextRequest) {
 // PUT: Update CrazyDeal
 export async function PUT(req: NextRequest) {
     try {
+        const adminCheck = await requireAdmin();
+        if (!adminCheck.authorized) return adminCheck.response!;
+
         const body = await req.json();
         const { id, ...data } = body;
 
@@ -70,6 +80,9 @@ export async function PUT(req: NextRequest) {
 // DELETE: Delete CrazyDeal
 export async function DELETE(req: NextRequest) {
     try {
+        const adminCheck = await requireAdmin();
+        if (!adminCheck.authorized) return adminCheck.response!;
+
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
 

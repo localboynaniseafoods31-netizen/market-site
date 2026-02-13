@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { successResponse, handleApiError } from '@/lib/api-response';
 
@@ -7,7 +6,7 @@ export async function GET() {
         const products = await prisma.product.findMany({
             include: {
                 category: {
-                    select: { slug: true, name: true },
+                    select: { slug: true, name: true, dealActive: true, dealPercentage: true },
                 },
             },
             where: { inStock: true },
@@ -15,7 +14,15 @@ export async function GET() {
         });
 
         // Transform to match frontend expectations
-        const formattedProducts = products.map((p) => ({
+        const formattedProducts = products.map((p) => {
+            const categoryDeal = (p.category.dealActive && (p.category.dealPercentage || 0) > 0)
+                ? (p.category.dealPercentage || 0)
+                : 0;
+            const productDeal = p.originalPrice
+                ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+                : 0;
+
+            return ({
             id: p.id,
             title: p.name,
             slug: p.slug,
@@ -29,16 +36,15 @@ export async function GET() {
             category: p.category.slug,
             subcategory: p.cutType,
             inStock: p.inStock,
-            offerPercentage: p.originalPrice
-                ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
-                : undefined,
+            offerPercentage: productDeal > 0 ? productDeal : (categoryDeal > 0 ? categoryDeal : undefined),
             description: p.description,
             pieces: p.pieces,
             serves: p.serves,
             sourcing: p.sourcing,
             cutType: p.cutType,
             texture: p.texture,
-        }));
+            });
+        });
 
         return successResponse(formattedProducts);
     } catch (error) {

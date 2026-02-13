@@ -1,15 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { auth } from '@/lib/auth';
+import { checkRateLimit, rateLimitExceededResponse } from '@/lib/rate-limit';
+
+const phoneRegex = /^[6-9]\d{9}$/;
 
 export async function GET(req: NextRequest) {
-    const { searchParams } = new URL(req.url);
-    const phone = searchParams.get('phone');
+    const rateLimit = checkRateLimit(req, {
+        key: 'customer:lookup',
+        limit: 10,
+        windowMs: 60_000
+    });
+    if (!rateLimit.allowed) return rateLimitExceededResponse(rateLimit);
 
-    if (!phone) {
+    const { searchParams } = new URL(req.url);
+    const phone = (searchParams.get('phone') || '').replace(/\D/g, '').slice(0, 10);
+
+    if (!phoneRegex.test(phone)) {
         return NextResponse.json({ error: 'Phone number required' }, { status: 400 });
     }
 
     try {
+        const session = await auth();
+        const role = (session?.user as { role?: string } | undefined)?.role;
+        const isAdmin = role === 'ADMIN';
+        const isOwnPhone = !!session?.user?.phone && session.user.phone === phone;
+        if (!isAdmin && !isOwnPhone) {
+            return NextResponse.json({ found: false });
+        }
+
         const user = await prisma.user.findUnique({
             where: { phone },
             include: {

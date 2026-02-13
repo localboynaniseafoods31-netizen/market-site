@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import CategorySidebar from "@/components/category/CategorySidebar";
 import CategoryBanner from "@/components/category/CategoryBanner";
-import CategoryFilters from "@/components/category/CategoryFilters";
 import CategoryProductGrid from "@/components/category/CategoryProductGrid";
 import BottomNav from "@/components/layout/BottomNav";
 import prisma from "@/lib/prisma";
@@ -83,7 +82,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             include: { category: true },
             where: {
                 inStock: true,
-                originalPrice: { gt: prisma.product.fields.price }
+                OR: [
+                    { originalPrice: { gt: prisma.product.fields.price } },
+                    { category: { dealActive: true, dealPercentage: { gt: 0 } } }
+                ]
             }
         });
     } else {
@@ -113,7 +115,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     }
 
     // Transform Types
-    const products: Product[] = productsData.map(p => ({
+    const products: Product[] = productsData.map(p => {
+        const categoryDeal = (p.category.dealActive && (p.category.dealPercentage || 0) > 0)
+            ? (p.category.dealPercentage || 0)
+            : 0;
+        const productDeal = p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
+
+        return ({
         id: p.id,
         title: p.name,
         image: p.image,
@@ -126,7 +134,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         category: p.category.slug,
         subcategory: p.cutType || undefined,
         inStock: p.inStock,
-        offerPercentage: p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0,
+        offerPercentage: productDeal > 0 ? productDeal : categoryDeal,
         description: p.description || undefined,
         pieces: p.pieces || undefined,
         serves: p.serves || undefined,
@@ -134,7 +142,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         cutType: p.cutType || undefined,
         texture: p.texture || undefined,
         stock: p.stock,
-    }));
+        });
+    });
 
     const jsonLd = {
         "@context": "https://schema.org",

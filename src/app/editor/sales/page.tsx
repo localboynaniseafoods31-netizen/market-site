@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format, addDays } from 'date-fns';
-import { Calendar as CalendarIcon, Save, Loader2 } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -19,13 +19,19 @@ import { toast } from 'sonner';
 interface Product {
     id: string;
     name: string;
-    price: number; // paisa
+    price: number; // rupees
     stock: number;
 }
 
 interface DailySaleItem {
     productId: string;
-    price: number;
+    price: number; // rupees
+    stock: number;
+}
+
+interface DailySaleApiItem {
+    productId: string;
+    price: number; // paisa in DB
     stock: number;
 }
 
@@ -65,10 +71,10 @@ export default function DailySalesPage() {
             if (data.success && data.data) {
                 // Map existing sale items to state
                 const itemsMap: Record<string, DailySaleItem> = {};
-                data.data.items.forEach((item: any) => {
+                data.data.items.forEach((item: DailySaleApiItem) => {
                     itemsMap[item.productId] = {
                         productId: item.productId,
-                        price: item.price,
+                        price: item.price / 100,
                         stock: item.stock,
                     };
                 });
@@ -107,7 +113,12 @@ export default function DailySalesPage() {
         try {
             // Filter out items with 0 stock (assuming 0 stock means not for sale that day)
             // Or send all? Let's send all defined items.
-            const items = Object.values(saleItems).filter(item => item.stock > 0);
+            const items = Object.values(saleItems)
+                .filter(item => item.stock > 0)
+                .map(item => ({
+                    ...item,
+                    price: Math.round(item.price * 100)
+                }));
 
             const res = await fetch('/api/editor/daily-sales', {
                 method: 'POST',
@@ -125,7 +136,7 @@ export default function DailySalesPage() {
             } else {
                 toast.error(result.error || 'Failed to submit');
             }
-        } catch (error) {
+        } catch {
             toast.error('Something went wrong');
         } finally {
             setLoading(false);
@@ -160,7 +171,7 @@ export default function DailySalesPage() {
                         <TableRow>
                             <TableHead>Product</TableHead>
                             <TableHead>Base Price</TableHead>
-                            <TableHead>Today's Price (₹)</TableHead>
+                            <TableHead>Today&apos;s Price (₹)</TableHead>
                             <TableHead>Stock Available</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -168,13 +179,13 @@ export default function DailySalesPage() {
                         {products.map((product) => (
                             <TableRow key={product.id}>
                                 <TableCell className="font-medium">{product.name}</TableCell>
-                                <TableCell>₹{product.price / 100}</TableCell>
+                                <TableCell>₹{product.price}</TableCell>
                                 <TableCell>
                                     <Input
                                         type="number"
                                         className="w-24"
-                                        value={saleItems[product.id]?.price !== undefined ? saleItems[product.id].price / 100 : product.price / 100}
-                                        onChange={(e) => handleItemChange(product.id, 'price', Number(e.target.value) * 100)}
+                                        value={saleItems[product.id]?.price !== undefined ? saleItems[product.id].price : product.price}
+                                        onChange={(e) => handleItemChange(product.id, 'price', Number(e.target.value))}
                                     />
                                 </TableCell>
                                 <TableCell>

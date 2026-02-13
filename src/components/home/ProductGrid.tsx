@@ -80,7 +80,7 @@ export default function ProductGrid({ title, segment, items, categories: propCat
                 {filteredProducts.length === 0 && (
                     <div className="py-20 text-center space-y-4">
                         <div className="text-4xl text-slate-300">🎣</div>
-                        <p className="text-slate-500 font-medium">Coming soon! We're catching them for you.</p>
+                        <p className="text-slate-500 font-medium">Coming soon! We&apos;re catching them for you.</p>
                     </div>
                 )}
             </div>

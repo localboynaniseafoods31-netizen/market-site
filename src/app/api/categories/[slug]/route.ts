@@ -14,7 +14,7 @@ export async function GET(
         // Handle 'all' and 'deals' special cases
         if (slug === 'all') {
             const products = await prisma.product.findMany({
-                include: { category: { select: { slug: true } } },
+                include: { category: { select: { slug: true, dealActive: true, dealPercentage: true } } },
                 where: { inStock: true },
             });
 
@@ -27,10 +27,13 @@ export async function GET(
 
         if (slug === 'deals') {
             const products = await prisma.product.findMany({
-                include: { category: { select: { slug: true } } },
+                include: { category: { select: { slug: true, dealActive: true, dealPercentage: true } } },
                 where: {
                     inStock: true,
-                    originalPrice: { not: null },
+                    OR: [
+                        { originalPrice: { gt: prisma.product.fields.price } },
+                        { category: { dealActive: true, dealPercentage: { gt: 0 } } }
+                    ],
                 },
             });
 
@@ -50,6 +53,9 @@ export async function GET(
                         inStock: true,
                         ...(filter && filter !== 'All' ? { cutType: filter } : {}),
                     },
+                    include: {
+                        category: { select: { slug: true, dealActive: true, dealPercentage: true } },
+                    },
                 },
             },
         });
@@ -64,15 +70,41 @@ export async function GET(
             name: category.name,
             description: category.description,
             icon: category.icon,
-            products: category.products.map((p) => formatProduct({ ...p, category: { slug } })),
+            products: category.products.map((p) => formatProduct(p)),
         });
     } catch (error) {
         return handleApiError(error);
     }
 }
 
+type CategoryApiProduct = {
+    id: string;
+    name: string;
+    image: string;
+    grossWeight: string;
+    netWeight: string;
+    price: number;
+    originalPrice: number | null;
+    deliveryTime: string | null;
+    cutType: string | null;
+    inStock: boolean;
+    category?: {
+        slug: string;
+        dealActive?: boolean;
+        dealPercentage?: number | null;
+    };
+};
+
 // Helper to format product for frontend
-function formatProduct(p: any) {
+function formatProduct(p: CategoryApiProduct) {
+    const categoryDeal = (p.category?.dealActive && (p.category.dealPercentage || 0) > 0)
+        ? (p.category.dealPercentage || 0)
+        : 0;
+    const productDeal = p.originalPrice
+        ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+        : 0;
+    const offerPercentage = productDeal > 0 ? productDeal : (categoryDeal > 0 ? categoryDeal : undefined);
+
     return {
         id: p.id,
         title: p.name,
@@ -85,8 +117,6 @@ function formatProduct(p: any) {
         category: p.category?.slug,
         subcategory: p.cutType,
         inStock: p.inStock,
-        offerPercentage: p.originalPrice
-            ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
-            : undefined,
+        offerPercentage,
     };
 }

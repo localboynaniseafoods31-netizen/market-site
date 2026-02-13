@@ -25,6 +25,7 @@ import prisma from "@/lib/prisma";
 import type { Product } from "@/data/seafoodData";
 
 export default async function V2Page() {
+    const now = new Date();
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -78,7 +79,13 @@ export default async function V2Page() {
             slug: c.slug
         }));
 
-    const products: Product[] = productsData.map(p => ({
+    const products: Product[] = productsData.map(p => {
+        const categoryDeal = (p.category.dealActive && (p.category.dealPercentage || 0) > 0)
+            ? (p.category.dealPercentage || 0)
+            : 0;
+        const productDeal = p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
+
+        return ({
         id: p.id,
         title: p.name,
         image: p.image,
@@ -91,7 +98,7 @@ export default async function V2Page() {
         category: p.category.slug,
         subcategory: p.cutType || undefined, // Map cutType to subcategory
         inStock: p.inStock,
-        offerPercentage: p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0,
+        offerPercentage: productDeal > 0 ? productDeal : categoryDeal,
         description: p.description || undefined,
         pieces: p.pieces || undefined,
         serves: p.serves || undefined,
@@ -99,18 +106,39 @@ export default async function V2Page() {
         cutType: p.cutType || undefined,
         texture: p.texture || undefined,
         stock: p.stock,
-    }));
+        });
+    });
 
     // Filter Deals
     const deals = products.filter(p => (p.offerPercentage || 0) > 0);
 
     // Fetch CrazyDeals for banners
-    const crazyDealsData = await prisma.crazyDeal.findMany({
-        where: { isActive: true },
-        orderBy: { position: 'asc' }
-    });
+    const [crazyDealsData, saleBannersData] = await Promise.all([
+        prisma.crazyDeal.findMany({
+            where: { isActive: true },
+            orderBy: { position: 'asc' }
+        }),
+        prisma.saleBanner.findMany({
+            where: {
+                isActive: true,
+                OR: [
+                    { startDate: null },
+                    { startDate: { lte: now } }
+                ],
+                AND: [
+                    {
+                        OR: [
+                            { endDate: null },
+                            { endDate: { gte: now } }
+                        ]
+                    }
+                ]
+            },
+            orderBy: { position: 'asc' }
+        })
+    ]);
 
-    const banners = crazyDealsData.map(d => ({
+    const crazyDealBanners = crazyDealsData.map(d => ({
         id: d.id,
         title: d.title,
         subtitle: d.subtitle,
@@ -120,6 +148,17 @@ export default async function V2Page() {
         code: d.promoCode,
         link: d.linkUrl
     }));
+    const saleBanners = saleBannersData.map((b) => ({
+        id: b.id,
+        title: b.title,
+        subtitle: b.title,
+        description: null,
+        bgColor: 'from-slate-700 to-slate-900',
+        image: b.imageUrl,
+        code: null,
+        link: b.linkUrl || '/category/deals'
+    }));
+    const banners = [...saleBanners, ...crazyDealBanners];
 
     return (
         <main className="min-h-screen bg-background ocean-mesh">

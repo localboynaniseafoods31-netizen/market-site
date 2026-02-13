@@ -30,7 +30,7 @@ export async function GET(
         }
 
         // Check ownership (unless admin)
-        const isAdmin = (session.user as any).role === 'ADMIN';
+        const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
         if (order.userId !== session.user.id && !isAdmin) {
             return errorResponse('FORBIDDEN', 'Access denied', 403);
         }

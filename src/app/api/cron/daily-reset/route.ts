@@ -17,11 +17,12 @@ const transporter = nodemailer.createTransport({
 export async function GET(req: NextRequest) {
     // 1. Auth Check (Basic Cron Security)
     const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        // Allow running locally in dev without secret for testing if needed, or strictly enforce
-        if (process.env.NODE_ENV === 'production') {
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+        return new NextResponse('Cron secret not configured', { status: 500 });
+    }
+    if (authHeader !== `Bearer ${cronSecret}`) {
+        return new NextResponse('Unauthorized', { status: 401 });
     }
 
     try {

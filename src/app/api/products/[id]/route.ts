@@ -13,7 +13,7 @@ export async function GET(
             where: { id },
             include: {
                 category: {
-                    select: { slug: true, name: true },
+                    select: { slug: true, name: true, dealActive: true, dealPercentage: true },
                 },
             },
         });
@@ -21,6 +21,13 @@ export async function GET(
         if (!product) {
             return errorResponse('NOT_FOUND', 'Product not found', 404);
         }
+
+        const categoryDeal = (product.category.dealActive && (product.category.dealPercentage || 0) > 0)
+            ? (product.category.dealPercentage || 0)
+            : 0;
+        const productDeal = product.originalPrice
+            ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+            : 0;
 
         // Transform to match frontend expectations
         const formattedProduct = {
@@ -37,9 +44,7 @@ export async function GET(
             category: product.category.slug,
             subcategory: product.cutType,
             inStock: product.inStock,
-            offerPercentage: product.originalPrice
-                ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-                : undefined,
+            offerPercentage: productDeal > 0 ? productDeal : (categoryDeal > 0 ? categoryDeal : undefined),
             description: product.description,
             pieces: product.pieces,
             serves: product.serves,

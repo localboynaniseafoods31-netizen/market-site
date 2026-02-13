@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
-import Image from "next/image";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import crypto from 'crypto';
 
 // Force dynamic rendering as it depends on route params and DB data
 export const dynamic = 'force-dynamic';
@@ -9,10 +10,33 @@ interface InvoicePageProps {
     params: Promise<{
         id: string;
     }>;
+    searchParams: Promise<{
+        t?: string;
+    }>;
 }
 
-export default async function InvoicePage({ params }: InvoicePageProps) {
+const invoiceTokenSecret = process.env.AUTH_SECRET || process.env.RAZORPAY_KEY_SECRET || '';
+
+const buildInvoiceToken = (orderId: string, orderNumber: string, total: number): string | null => {
+    if (!invoiceTokenSecret) return null;
+    return crypto
+        .createHmac('sha256', invoiceTokenSecret)
+        .update(`${orderId}|${orderNumber}|${total}`)
+        .digest('hex');
+};
+
+const safeCompare = (a: string, b: string): boolean => {
+    const ab = Buffer.from(a, 'utf8');
+    const bb = Buffer.from(b, 'utf8');
+    if (ab.length !== bb.length) return false;
+    return crypto.timingSafeEqual(ab, bb);
+};
+
+export default async function InvoicePage({ params, searchParams }: InvoicePageProps) {
     const { id } = await params;
+    const query = await searchParams;
+    const token = query.t;
+    const session = await auth();
 
     const order = await prisma.order.findUnique({
         where: { id },
@@ -27,6 +51,13 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
     });
 
     if (!order) {
+        return notFound();
+    }
+    const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
+    const isOwner = session?.user?.id && order.userId === session.user.id;
+    const expectedToken = buildInvoiceToken(order.id, order.orderNumber, order.total);
+    const hasValidToken = typeof token === 'string' && !!expectedToken && safeCompare(expectedToken, token);
+    if (!isAdmin && !isOwner && !hasValidToken) {
         return notFound();
     }
 

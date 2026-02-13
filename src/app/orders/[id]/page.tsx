@@ -2,12 +2,11 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Package, MapPin, Phone, User, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Package, MapPin, Phone, User, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useAppSelector, selectOrderById } from "@/store";
-import { getProductById } from "@/store/helpers";
 
 const statusColors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -118,8 +117,8 @@ export default function OrderDetailPage() {
                 <div className="bg-card rounded-2xl p-6 shadow-sm border border-border mb-4">
                     <h2 className="font-bold text-foreground mb-4">Items ({order.items.length})</h2>
                     <div className="space-y-4">
-                        {order.items.map((item: any) => {
-                            const product = getProductById(item.productId);
+                        {order.items.map((item) => {
+                            const unitPrice = item.priceAtOrder > 1000 ? item.priceAtOrder / 100 : item.priceAtOrder;
                             return (
                                 <div key={item.productId} className="flex items-center gap-4">
                                     <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
@@ -127,9 +126,9 @@ export default function OrderDetailPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-foreground truncate">{item.title}</p>
-                                        <p className="text-sm text-muted-foreground">Qty: {item.quantity} × ₹{item.priceAtOrder}</p>
+                                        <p className="text-sm text-muted-foreground">Qty: {item.quantity} × ₹{unitPrice}</p>
                                     </div>
-                                    <p className="font-bold text-foreground">₹{item.priceAtOrder * item.quantity}</p>
+                                    <p className="font-bold text-foreground">₹{unitPrice * item.quantity}</p>
                                 </div>
                             );
                         })}

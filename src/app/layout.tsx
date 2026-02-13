@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 };
 
 import LocationHeader from "@/components/layout/LocationHeader";
+import LocationInitializer from "@/components/common/LocationInitializer";
 import BottomNav from "@/components/layout/BottomNav";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -48,6 +49,7 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <ThemeProvider>
+            <LocationInitializer />
             <LocationHeader />
 
             <main className="min-h-screen pt-14 md:pt-16">

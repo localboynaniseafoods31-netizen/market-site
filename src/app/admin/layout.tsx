@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth, signOut } from '@/lib/auth';
 import Link from 'next/link';
-import { Package, ShoppingBag, LayoutDashboard, Tags, LogOut, ChevronRight, TrendingUp, Calendar, Image, Megaphone, Sparkles } from 'lucide-react';
+import { Package, ShoppingBag, LayoutDashboard, Tags, LogOut, ChevronRight, TrendingUp, Calendar, Image, Megaphone, Sparkles, Users } from 'lucide-react';
 
 export default async function AdminLayout({
     children,
@@ -23,6 +23,7 @@ export default async function AdminLayout({
         { href: '/admin/sales', icon: TrendingUp, label: 'Sales', mobileLabel: 'Sales' },
         { href: '/admin/approvals', icon: Calendar, label: 'Approvals', mobileLabel: 'Approve' },
         { href: '/admin/orders', icon: ShoppingBag, label: 'Orders', mobileLabel: 'Orders' },
+        { href: '/admin/users', icon: Users, label: 'Users', mobileLabel: 'Users' },
         { href: '/admin/products', icon: Package, label: 'Products', mobileLabel: 'Prods' },
         { href: '/admin/categories', icon: Tags, label: 'Categories', mobileLabel: 'Cats' },
         { href: '/admin/deals', icon: Sparkles, label: 'Crazy Deals', mobileLabel: 'Deals' },
@@ -34,7 +35,7 @@ export default async function AdminLayout({
         <div className="min-h-screen bg-muted/30">
             {/* Admin Header */}
             <header className="sticky top-0 z-50 bg-background border-b border-border overflow-hidden">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                <div className="w-full px-6 h-14 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin" className="text-xl font-black text-primary truncate max-w-[150px] md:max-w-none">
                             Localboynaniseafoods Admin
@@ -67,8 +68,8 @@ export default async function AdminLayout({
 
             <div className="flex">
                 {/* Sidebar */}
-                <aside className="w-64 bg-card border-r border-border min-h-[calc(100vh-64px)] p-4 hidden md:block">
-                    <nav className="space-y-2">
+                <aside className="w-64 bg-card border-r border-border min-h-[calc(100vh-56px)] py-2 hidden md:block">
+                    <nav className="space-y-1">
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
@@ -99,7 +100,7 @@ export default async function AdminLayout({
                 </div>
 
                 {/* Main Content */}
-                <main className="flex-1 p-6 pb-24 md:pb-6 overflow-x-hidden">{children}</main>
+                <main className="flex-1 p-4 md:p-6 md:pt-2 pb-24 md:pb-6 overflow-x-hidden">{children}</main>
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_NAME } from '@/config';
 import { Truck, Clock, MapPin } from 'lucide-react';
+import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from '@/config/constants';
 
 export const metadata: Metadata = {
     title: `Shipping Policy - ${SITE_NAME}`,
@@ -34,10 +35,10 @@ export default function ShippingPage() {
                 <div className="prose prose-slate dark:prose-invert max-w-none">
                     <h3>Delivery Fee</h3>
                     <p>
-                        <strong>Free Delivery:</strong> On all orders above ₹499.
+                        <strong>Free Delivery:</strong> On orders with total shipment weight of at least {DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg.
                     </p>
                     <p>
-                        <strong>Standard Charge:</strong> A nominal fee of ₹40 applies for orders below ₹499 to cover efficient logistics and cold-chain maintenance.
+                        <strong>Standard Charge:</strong> A flat fee of ₹{DELIVERY_FEE} applies for orders below the free-delivery weight threshold.
                     </p>
 
                     <h3>Delivery Timings</h3>

@@ -1,17 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, rateLimitExceededResponse } from '@/lib/rate-limit';
 
 interface NominatimResponse {
     address?: {
         postcode?: string;
+        pincode?: string;
         suburb?: string;
         neighbourhood?: string;
+        city_district?: string;
+        state_district?: string;
         city?: string;
         town?: string;
         village?: string;
         state?: string;
         country?: string;
+        country_code?: string;
     };
     display_name?: string;
+}
+
+interface BigDataCloudResponse {
+    postcode?: string;
+    locality?: string;
+    city?: string;
+    principalSubdivision?: string;
+    countryCode?: string;
 }
 
 export interface GeocodeResult {
@@ -22,6 +35,19 @@ export interface GeocodeResult {
     displayName: string;
 }
 
+const extractIndianPincode = (value: unknown): string | null => {
+    if (typeof value !== 'string') return null;
+    const match = value.match(/\b\d{6}\b/);
+    return match ? match[0] : null;
+};
+
+const parseCoordinate = (value: string | null, min: number, max: number): number | null => {
+    if (!value) return null;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < min || parsed > max) return null;
+    return parsed;
+};
+
 /**
  * GET /api/geocode?lat=12.9716&lng=77.5946
  * 
@@ -29,24 +55,20 @@ export interface GeocodeResult {
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
     try {
+        const rateLimit = checkRateLimit(request, {
+            key: 'location:geocode',
+            limit: 30,
+            windowMs: 60_000
+        });
+        if (!rateLimit.allowed) return rateLimitExceededResponse(rateLimit);
+
         const { searchParams } = new URL(request.url);
-        const lat = searchParams.get('lat');
-        const lng = searchParams.get('lng');
+        const lat = parseCoordinate(searchParams.get('lat'), -90, 90);
+        const lng = parseCoordinate(searchParams.get('lng'), -180, 180);
 
-        if (!lat || !lng) {
+        if (lat === null || lng === null) {
             return NextResponse.json(
-                { error: 'Missing lat or lng parameter' },
-                { status: 400 }
-            );
-        }
-
-        // Validate coordinates
-        const latitude = parseFloat(lat);
-        const longitude = parseFloat(lng);
-
-        if (isNaN(latitude) || isNaN(longitude)) {
-            return NextResponse.json(
-                { error: 'Invalid coordinates' },
+                { error: 'Invalid lat or lng parameter' },
                 { status: 400 }
             );
         }
@@ -57,20 +79,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         let city = '';
         let state = '';
         let displayName = '';
+        let isIndia = false;
 
-        const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+        const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
         try {
             const response = await fetch(bdcUrl, {
                 next: { revalidate: 3600 },
                 headers: { 'Accept': 'application/json' },
             });
             if (response.ok) {
-                const data = await response.json();
-                pincode = data.postcode || '';
+                const data = await response.json() as BigDataCloudResponse;
+                pincode = extractIndianPincode(data.postcode) || '';
                 locality = data.locality || data.principalSubdivision || '';
                 city = data.city || data.locality || '';
                 state = data.principalSubdivision || '';
                 displayName = [locality, city].filter(Boolean).join(', ');
+                isIndia = data.countryCode === 'IN';
             }
         } catch (e) {
             console.warn('BigDataCloud geocode failed, trying Nominatim', e);
@@ -78,7 +102,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
         // Fallback: Nominatim reverse (reliable for India, used by location search)
         if (!pincode || !locality) {
-            const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+            const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
             const nomRes = await fetch(nominatimUrl, {
                 headers: {
                     'User-Agent': 'Localboynaniseafoods/1.0 (delivery location)',
@@ -87,14 +111,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
                 next: { revalidate: 3600 },
             });
             if (nomRes.ok) {
-                const nomData = await nomRes.json();
+                const nomData = await nomRes.json() as NominatimResponse;
                 const addr = nomData?.address || {};
-                pincode = pincode || addr.postcode || addr.pincode || '';
+                pincode = pincode || extractIndianPincode(addr.postcode) || extractIndianPincode(addr.pincode) || '';
                 locality = locality || addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city_district || '';
                 city = city || addr.city || addr.town || addr.village || addr.state_district || '';
                 state = state || addr.state || '';
+                isIndia = isIndia || addr.country_code === 'in';
                 if (!displayName) displayName = [locality, city].filter(Boolean).join(', ') || nomData?.display_name || '';
             }
+        }
+
+        if (!isIndia) {
+            return NextResponse.json(
+                { error: 'Location outside India is not supported.' },
+                { status: 422 }
+            );
         }
 
         if (!pincode) {

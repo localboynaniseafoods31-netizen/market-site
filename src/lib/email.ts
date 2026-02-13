@@ -124,7 +124,7 @@ export const sendOrderConfirmation = async (order: OrderEmailProps, email: strin
     }
 };
 
-export const sendAdminNotification = async (order: OrderEmailProps) => {
+export const sendAdminNotification = async (order: OrderEmailProps, targetEmail?: string) => {
     // Simplified Admin Notification
     const html = `
         <h2>New Order Received: ${order.orderNumber}</h2>
@@ -144,16 +144,18 @@ export const sendAdminNotification = async (order: OrderEmailProps) => {
     try {
         if (!process.env.SMTP_HOST) {
             console.log('---------------------------------------------------');
-            console.log('📧 MOCK ADMIN NOTIFICATION');
+            console.log('📧 MOCK ADMIN NOTIFICATION', targetEmail ? `TO: ${targetEmail}` : 'TO ENV');
             console.log('Subject: New Order:', order.orderNumber);
             console.log('---------------------------------------------------');
             return;
         }
 
-        const adminEmails = (process.env.ADMIN_EMAIL || 'admin@localboynaniseafoods.com')
-            .split(',')
-            .map(e => e.trim())
-            .filter(e => e.length > 0);
+        const adminEmails = targetEmail
+            ? [targetEmail]
+            : (process.env.ADMIN_EMAIL || 'admin@localboynaniseafoods.com')
+                .split(',')
+                .map(e => e.trim())
+                .filter(e => e.length > 0);
 
         console.log(`📧 Sending Admin Notifications to: ${adminEmails.join(', ')}`);
 
@@ -182,6 +184,7 @@ const STATUS_INFO: Record<string, { label: string; emoji: string; message: strin
     SHIPPED: { label: 'Shipped', emoji: '🚚', message: 'Your order is on the way! It will arrive soon.', color: '#8b5cf6' },
     DELIVERED: { label: 'Delivered', emoji: '🎉', message: 'Your order has been delivered! Enjoy your fresh seafood.', color: '#10b981' },
     CANCELLED: { label: 'Cancelled', emoji: '❌', message: 'Your order has been cancelled. If you have questions, please contact us.', color: '#ef4444' },
+    PAYMENT_FAILED: { label: 'Payment Failed', emoji: '⚠️', message: 'Your payment could not be processed. Please try again or contact support.', color: '#ef4444' },
 };
 
 /**

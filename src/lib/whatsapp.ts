@@ -119,10 +119,10 @@ export const sendOrderConfirmationWhatsApp = async (order: any, invoiceUrl?: str
  * Send Admin Alert for New Order
  * Uses same or different template based on your Authkey setup
  */
-export const sendAdminAlertWhatsApp = async (order: any) => {
-    const adminPhone = process.env.ADMIN_PHONE;
+export const sendAdminAlertWhatsApp = async (order: any, targetPhone?: string) => {
+    const adminPhone = targetPhone || process.env.ADMIN_PHONE;
     if (!adminPhone) {
-        console.log('⚠️ No ADMIN_PHONE configured, skipping admin alert');
+        console.log('⚠️ No ADMIN_PHONE configured and no target provided, skipping admin alert');
         return;
     }
 

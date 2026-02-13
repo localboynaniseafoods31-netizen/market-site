@@ -30,6 +30,7 @@ import {
     DrawerFooter,
 } from "@/components/ui/drawer";
 import { LocationState } from "@/store/slices/locationSlice";
+import UnserviceableBanner from "@/components/common/UnserviceableBanner";
 
 interface SearchResult {
     place_id: number;
@@ -511,6 +512,7 @@ export default function LocationHeader() {
                     </div>
                 </div>
             </div>
-        </header>
+            <UnserviceableBanner />
+        </header >
     );
 }

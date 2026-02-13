@@ -121,7 +121,7 @@ export default function Footer() {
                         © 2024 Localboynaniseafoods Pvt Ltd. All rights reserved.
                         <span className="mx-2 hidden md:inline">|</span>
                         <span className="block md:inline mt-1 md:mt-0">
-                            Built by <Link href="https://somanathkhadanga.com/" target="_blank" className="hover:text-foreground transition-colors">Somanath Khadanga</Link>
+                            Built by <Link href="https://somanathkhadanga.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Somanath Khadanga</Link>
                         </span>
                     </div>
                     <div className="flex items-center gap-4">

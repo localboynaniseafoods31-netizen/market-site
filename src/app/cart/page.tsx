@@ -16,7 +16,6 @@ import {
     decrementQuantity,
     removeFromCart,
     clearCart,
-    selectIsServiceable,
     selectCartWeight,
 } from "@/store";
 import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
@@ -27,8 +26,6 @@ export default function CartPage() {
     const rawCartTotal = useAppSelector(selectCartTotal);
     const rawCartSavings = useAppSelector(selectCartSavings);
     const itemCount = useAppSelector(selectCartItemCount);
-    const isServiceable = useAppSelector(selectIsServiceable);
-
     // Convert to Rupees for display and logic
     const cartTotal = rawCartTotal / 100;
     const cartSavings = rawCartSavings / 100;
@@ -48,7 +45,7 @@ export default function CartPage() {
                         </div>
                         <h1 className="text-2xl font-black text-foreground mb-3">Your cart is empty</h1>
                         <p className="text-muted-foreground mb-8">
-                            Looks like you haven't added anything yet. Let's fix that!
+                            Looks like you haven&apos;t added anything yet. Let&apos;s fix that!
                         </p>
                         <Link href="/category">
                             <Button size="lg" className="rounded-full px-8 font-bold bg-slate-900 hover:bg-slate-800">
@@ -197,22 +194,12 @@ export default function CartPage() {
                                 </div>
                             </div>
 
-                            {isServiceable ? (
-                                <Link href="/checkout" className="hidden lg:block mt-6">
-                                    <Button size="lg" className="w-full h-14 rounded-full font-bold text-lg bg-slate-900 hover:bg-slate-800">
-                                        Checkout <ArrowRight className="ml-2 w-5 h-5" />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <div className="hidden lg:block mt-6">
-                                    <Button disabled size="lg" className="w-full h-14 rounded-full font-bold text-lg bg-slate-900/50 cursor-not-allowed">
-                                        Location Unserviceable
-                                    </Button>
-                                    <p className="text-xs text-red-500 text-center mt-2 font-medium">
-                                        We do not deliver to your selected location yet.
-                                    </p>
-                                </div>
-                            )}
+                            <Link href="/checkout" className="hidden lg:block mt-6">
+                                <Button size="lg" className="w-full h-14 rounded-full font-bold text-lg bg-slate-900 hover:bg-slate-800">
+                                    Checkout <ArrowRight className="ml-2 w-5 h-5" />
+                                </Button>
+                            </Link>
+
                         </div>
                     </div>
                 </div>
@@ -225,23 +212,12 @@ export default function CartPage() {
                         <p className="text-xs text-muted-foreground">Total</p>
                         <p className="text-xl font-black text-foreground">₹{finalTotal}</p>
                     </div>
-                    {isServiceable ? (
-                        <Link href="/checkout">
-                            <Button size="lg" className="rounded-full px-8 font-bold bg-slate-900 hover:bg-slate-800">
-                                Checkout <ArrowRight className="ml-2 w-4 h-4" />
-                            </Button>
-                        </Link>
-                    ) : (
-                        <Button disabled size="lg" className="rounded-full px-8 font-bold bg-slate-900/50 cursor-not-allowed">
-                            Unserviceable
+                    <Link href="/checkout">
+                        <Button size="lg" className="rounded-full px-8 font-bold bg-slate-900 hover:bg-slate-800">
+                            Checkout <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>
-                    )}
+                    </Link>
                 </div>
-                {!isServiceable && (
-                    <p className="text-xs text-red-500 text-center -mt-2 mb-2 font-medium w-full">
-                        We do not deliver here yet.
-                    </p>
-                )}
             </div>
         </div>
     );
