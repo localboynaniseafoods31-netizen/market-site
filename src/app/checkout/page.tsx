@@ -23,7 +23,7 @@ import {
     selectCartWeight,
     selectLocation,
 } from "@/store";
-import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
+import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
 import { checkDeliveryAvailability } from "@/data/deliveryZones";
 
 type CheckoutStep = 'details' | 'address' | 'confirm';
@@ -129,11 +129,6 @@ export default function CheckoutPage() {
         }
     }, [addressInput.pincode]);
 
-    // Verify these selectors exist!
-    const cartWeight = useAppSelector(selectCartWeight);
-    const deliveryFee = cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : DELIVERY_FEE;
-    const finalTotal = cartTotal + deliveryFee;
-
     // Validate phone (10 digits)
     const isPhoneValid = /^[6-9]\d{9}$/.test(phone);
     const isNameValid = name.trim().length >= 2;
@@ -144,9 +139,11 @@ export default function CheckoutPage() {
     // Validate that address matches selected location
     // Validate City against Pincode
     const deliveryCheck = checkDeliveryAvailability(addressInput.pincode);
+    const cartWeight = useAppSelector(selectCartWeight);
+    const baseDeliveryFee = deliveryCheck.available && deliveryCheck.zone ? deliveryCheck.zone.charge : 0;
+    const deliveryFee = cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : baseDeliveryFee;
+    const finalTotal = cartTotal + deliveryFee;
     const expectedCity = deliveryCheck.zone?.locality;
-    const minOrderAmount = deliveryCheck.zone?.minOrder ?? 0;
-    const isMinOrderMet = !deliveryCheck.available || finalTotal >= minOrderAmount;
     // Case-insensitive check, allowing for minor differences if needed, but strict based on prompt requirements
     const isCityMatching = !expectedCity || (addressInput.city.trim().toLowerCase() === expectedCity.toLowerCase());
 
@@ -205,11 +202,6 @@ export default function CheckoutPage() {
     const handlePayment = async () => {
         if (!deliveryCheck.available || !isCityMatching) {
             alert('Please provide a valid serviceable delivery address.');
-            return;
-        }
-
-        if (!isMinOrderMet) {
-            alert(`Minimum order for this area is ₹${minOrderAmount}.`);
             return;
         }
 
@@ -617,9 +609,9 @@ export default function CheckoutPage() {
                                         )}
                                     </div>
                                 </div>
-                                {deliveryCheck.available && minOrderAmount > 0 && (
+                                {deliveryCheck.available && deliveryCheck.zone && (
                                     <p className="text-xs text-slate-600">
-                                        Minimum order for this area: ₹{minOrderAmount}
+                                        Delivery charge for this area: {cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 'FREE' : `₹${deliveryCheck.zone.charge}`} (free above {DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg)
                                     </p>
                                 )}
                             </div>
@@ -690,11 +682,6 @@ export default function CheckoutPage() {
                                 <p className="text-sm text-slate-600">{phone}</p>
                                 <p className="text-sm text-slate-600 mt-2">{addressInput.fullAddress}</p>
                                 <p className="text-sm text-slate-600">{addressInput.city} - {addressInput.pincode}</p>
-                                {deliveryCheck.available && minOrderAmount > 0 && !isMinOrderMet && (
-                                    <p className="text-sm text-red-600 mt-3">
-                                        Add items worth ₹{Math.max(0, minOrderAmount - finalTotal)} more to meet the area minimum order.
-                                    </p>
-                                )}
                             </div>
 
                             <div className="flex gap-3">
@@ -703,7 +690,7 @@ export default function CheckoutPage() {
                                 </Button>
                                 <Button
                                     onClick={handlePayment}
-                                    disabled={isProcessing || !isMinOrderMet}
+                                    disabled={isProcessing}
                                     className="flex-1 h-12 rounded-full font-bold text-lg bg-sky-600 hover:bg-sky-700"
                                 >
                                     {isProcessing ? 'Processing...' : 'Pay Now'}

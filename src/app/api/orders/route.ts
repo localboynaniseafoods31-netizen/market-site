@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '@/lib/prisma';
-import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from '@/config/constants';
-import { parseWeight } from '@/lib/utils';
+import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from '@/config/constants';
 import { checkDeliveryAvailability } from '@/data/deliveryZones';
+import { parseWeight } from '@/lib/utils';
 import { checkRateLimit, rateLimitExceededResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
@@ -108,10 +108,7 @@ export async function POST(req: NextRequest) {
                 const itemPrice = product.price; // Price from DB (in Paise)
                 const lineTotal = itemPrice * item.quantity;
                 serverSubtotal += lineTotal;
-
-                // Calculate Weight
-                const weightKg = parseWeight(product.netWeight || product.grossWeight);
-                serverWeight += weightKg * item.quantity;
+                serverWeight += parseWeight(product.netWeight || product.grossWeight) * item.quantity;
 
                 orderItemsData.push({
                     productId: item.productId,
@@ -121,14 +118,10 @@ export async function POST(req: NextRequest) {
                 });
             }
 
-            // Recalculate Delivery Fee
-            const serverDeliveryFee = serverWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : (DELIVERY_FEE * 100); // Fee in Paise
+            // Delivery fee: zone-based charge from Excel, waived for heavy orders (>= 20kg)
+            const baseDeliveryFee = (deliveryCheck.zone!.charge || 0) * 100;
+            const serverDeliveryFee = serverWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : baseDeliveryFee;
             const serverTotal = serverSubtotal + serverDeliveryFee;
-            const minOrderPaisa = deliveryCheck.zone!.minOrder * 100;
-
-            if (serverTotal < minOrderPaisa) {
-                throw new Error(`Minimum order for this area is ₹${deliveryCheck.zone!.minOrder}`);
-            }
 
             // C. Create Order
             const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -186,7 +179,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'One or more items in your cart are no longer available. Please clear your cart.' }, { status: 400 });
         }
 
-        if (message.includes('Invalid quantity') || message.includes('Minimum order')) {
+        if (message.includes('Invalid quantity')) {
             return NextResponse.json({ error: message }, { status: 400 });
         }
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_NAME } from '@/config';
 import { Truck, Clock, MapPin } from 'lucide-react';
-import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from '@/config/constants';
+import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from '@/config/constants';
 
 export const metadata: Metadata = {
     title: `Shipping Policy - ${SITE_NAME}`,
@@ -35,10 +35,10 @@ export default function ShippingPage() {
                 <div className="prose prose-slate dark:prose-invert max-w-none">
                     <h3>Delivery Fee</h3>
                     <p>
-                        <strong>Free Delivery:</strong> On orders with total shipment weight of at least {DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg.
+                        Delivery charges are <strong>pincode-based</strong> as per our shipping sheet configuration.
                     </p>
                     <p>
-                        <strong>Standard Charge:</strong> A flat fee of ₹{DELIVERY_FEE} applies for orders below the free-delivery weight threshold.
+                        Please select your location or enter pincode at checkout to see the exact delivery charge and ETA for your area. Orders with total shipment weight of at least {DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg get free delivery.
                     </p>
 
                     <h3>Delivery Timings</h3>

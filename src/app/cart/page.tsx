@@ -17,8 +17,10 @@ import {
     removeFromCart,
     clearCart,
     selectCartWeight,
+    selectLocation,
 } from "@/store";
-import { DELIVERY_FEE, DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
+import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from "@/config/constants";
+import { checkDeliveryAvailability } from "@/data/deliveryZones";
 
 export default function CartPage() {
     const dispatch = useAppDispatch();
@@ -30,10 +32,12 @@ export default function CartPage() {
     const cartTotal = rawCartTotal / 100;
     const cartSavings = rawCartSavings / 100;
 
-    // Weight-based shipping (Free if >= 20kg)
+    const locationState = useAppSelector(selectLocation);
     const cartWeight = useAppSelector(selectCartWeight);
-    const deliveryFee = cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : DELIVERY_FEE;
-    const finalTotal = cartTotal + deliveryFee;
+    const locationCheck = locationState?.pincode ? checkDeliveryAvailability(locationState.pincode) : null;
+    const baseDeliveryFee = locationCheck?.available && locationCheck.zone ? locationCheck.zone.charge : null;
+    const deliveryFee = baseDeliveryFee === null ? null : (cartWeight >= DELIVERY_FREE_WEIGHT_THRESHOLD_KG ? 0 : baseDeliveryFee);
+    const finalTotal = cartTotal + (deliveryFee ?? 0);
 
     if (cartItems.length === 0) {
         return (
@@ -173,16 +177,22 @@ export default function CartPage() {
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Delivery</span>
                                     <span className="font-medium text-foreground">
-                                        {deliveryFee === 0 ? (
+                                        {locationCheck && !locationCheck.available ? (
+                                            <span className="text-red-600">Not serviceable</span>
+                                        ) : deliveryFee === null ? (
+                                            <span className="text-muted-foreground">Set location</span>
+                                        ) : deliveryFee === 0 ? (
                                             <span className="text-green-600">FREE</span>
                                         ) : (
                                             `₹${deliveryFee}`
                                         )}
                                     </span>
                                 </div>
-                                {deliveryFee > 0 && (
+                                {locationCheck?.available && baseDeliveryFee !== null && (
                                     <p className="text-xs text-muted-foreground bg-slate-50 p-2 rounded-lg">
-                                        Add {(DELIVERY_FREE_WEIGHT_THRESHOLD_KG - cartWeight).toFixed(1)}kg more for free delivery
+                                        {deliveryFee === 0
+                                            ? `Free delivery applied for ${DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg+ order weight`
+                                            : `Area delivery charge ₹${baseDeliveryFee} (free above ${DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg)`}
                                     </p>
                                 )}
                             </div>
