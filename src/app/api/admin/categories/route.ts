@@ -43,6 +43,17 @@ export async function POST(request: NextRequest) {
         if (!adminCheck.authorized) return adminCheck.response!;
 
         const body = await request.json();
+
+        // Sanitize slug to ensure it meets regex requirements
+        if (body.slug && typeof body.slug === 'string') {
+            body.slug = body.slug
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9-]/g, '-') // Replace invalid chars with hyphen
+                .replace(/-+/g, '-')         // Replace multiple hyphens with single
+                .replace(/^-|-$/g, '');      // Trim leading/trailing hyphens
+        }
+
         const input = createCategorySchema.parse(body);
 
         const category = await prisma.$transaction(async (tx) => {
