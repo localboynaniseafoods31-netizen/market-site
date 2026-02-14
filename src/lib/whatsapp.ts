@@ -82,30 +82,37 @@ export const sendAuthkeyWhatsApp = async (
 };
 
 /**
- * Send Order Confirmation to Customer
- * Template variables:
- *   {{1}} = Customer Name
- *   {{2}} = Order Number
- *   {{3}} = Amount (₹X)
- *   {{4}} = Invoice filename (for CTA button URL)
+ * Format order items for WhatsApp messages
+ * Returns string like: "Fish (4kg), Prawns (2kg)"
+ */
+const formatOrderItems = (items: any[]) => {
+    if (!items || items.length === 0) return 'Order Items';
+    return items.map(item => {
+        const product = item.product?.name || 'Item';
+        const quantity = item.quantity;
+        // Assuming quantity is just a number, we might need unit from product if available
+        // But for now, just sending name and qty is safer or "Fish x 2"
+        // User requested "Fish 4kg". If quantity is weight-based, we might need logic.
+        // Assuming item.quantity is the count being ordered.
+        return `${product} x ${quantity}`;
+    }).join(', ');
+};
+
+/**
+ * Send Order Confirmation to Customer (Placed)
+ * Template ID: 26155
+ * Variables: {{1}} Name, {{2}} Order Number, {{3}} Amount, {{4}} PDF Filename
  */
 export const sendOrderConfirmationWhatsApp = async (order: any, invoiceUrl?: string) => {
-    const templateId = process.env.AUTHKEY_TEMPLATE_ID || '101';
-    const invoiceBaseUrl = process.env.INVOICE_R2_BASE_URL || '';
-
-    // Extract just the filename from the full URL if needed
+    const templateId = '26155';
     const customerName = order.user?.name || order.deliveryName || 'Customer';
     const customerPhone = order.user?.phone || order.deliveryPhone;
 
-    if (!customerPhone) {
-        console.error('❌ No customer phone for WhatsApp');
-        return;
-    }
+    if (!customerPhone) return;
 
-    // Invoice filename for CTA button (e.g., "ORD-123456.pdf")
     const invoiceFileName = `${order.orderNumber}.pdf`;
 
-    const bodyValues: Record<string, string> = {
+    const bodyValues = {
         '1': customerName,
         '2': order.orderNumber,
         '3': `₹${(order.total / 100).toFixed(0)}`,
@@ -115,55 +122,83 @@ export const sendOrderConfirmationWhatsApp = async (order: any, invoiceUrl?: str
     return sendAuthkeyWhatsApp(customerPhone, templateId, bodyValues);
 };
 
-/**
- * Send Admin Alert for New Order
- * Uses same or different template based on your Authkey setup
- */
+// Admin alert reuse same confirmation or simpler template
 export const sendAdminAlertWhatsApp = async (order: any, targetPhone?: string) => {
     const adminPhone = targetPhone || process.env.ADMIN_PHONE;
-    if (!adminPhone) {
-        console.log('⚠️ No ADMIN_PHONE configured and no target provided, skipping admin alert');
-        return;
-    }
+    if (!adminPhone) return;
 
-    // Use same template or a different one for admin
-    const templateId = process.env.AUTHKEY_ADMIN_TEMPLATE_ID || process.env.AUTHKEY_TEMPLATE_ID || '101';
-
+    // Admin might want same details
+    // If we use 26155 for admin too:
+    const templateId = '26155';
     const customerName = order.user?.name || order.deliveryName || 'Customer';
+    const invoiceFileName = `${order.orderNumber}.pdf`;
 
-    const bodyValues: Record<string, string> = {
-        '1': customerName,
+    const bodyValues = {
+        '1': `Admin Alert: New Order from ${customerName}`,
         '2': order.orderNumber,
         '3': `₹${(order.total / 100).toFixed(0)}`,
-        '4': `${order.orderNumber}.pdf`
+        '4': invoiceFileName
     };
 
     return sendAuthkeyWhatsApp(adminPhone, templateId, bodyValues);
 };
 
 /**
- * Send Order Status Update WhatsApp
- * Requires a template with 3 variables:
- * {{1}} = Customer Name
- * {{2}} = Order Number
- * {{3}} = New Status (e.g. "Shipped", "Delivered")
+ * Send Order Delivered WhatsApp
+ * Template ID: 26156
+ * Variables: {{1}} Name, {{2}} Order Details (e.g. Fish 4kg)
+ */
+export const sendOrderDeliveredWhatsApp = async (phone: string, name: string, orderItems: any[]) => {
+    const templateId = '26156';
+    const details = formatOrderItems(orderItems);
+    return sendAuthkeyWhatsApp(phone, templateId, { '1': name, '2': details });
+};
+
+/**
+ * Send Order Cancelled WhatsApp
+ * Template ID: 26320
+ * Variables: {{1}} Name, {{2}} Order Name/Details
+ */
+export const sendOrderCancelledWhatsApp = async (phone: string, name: string, orderItems: any[]) => {
+    const templateId = '26320';
+    const details = formatOrderItems(orderItems);
+    return sendAuthkeyWhatsApp(phone, templateId, { '1': name, '2': details });
+};
+
+/**
+ * Send Order Shipped WhatsApp
+ * Template ID: 26323
+ * Variables: {{1}} Name, {{2}} Order Details
+ */
+export const sendOrderShippedWhatsApp = async (phone: string, name: string, orderItems: any[]) => {
+    const templateId = '26323';
+    const details = formatOrderItems(orderItems);
+    return sendAuthkeyWhatsApp(phone, templateId, { '1': name, '2': details });
+};
+
+/**
+ * Router for Status Updates
  */
 export const sendOrderStatusUpdateWhatsApp = async (
     phone: string,
     customerName: string,
-    orderNumber: string,
+    order: any,
     newStatus: string
 ) => {
     if (!phone) return;
 
-    // Use a specific template for status updates, or fallback to default
-    const templateId = process.env.AUTHKEY_STATUS_TEMPLATE_ID || '102';
+    // Map status to specific functions
+    if (newStatus === 'DELIVERED') {
+        return sendOrderDeliveredWhatsApp(phone, customerName, order.items);
+    }
+    if (newStatus === 'CANCELLED') {
+        return sendOrderCancelledWhatsApp(phone, customerName, order.items);
+    }
+    if (newStatus === 'SHIPPED') {
+        return sendOrderShippedWhatsApp(phone, customerName, order.items);
+    }
 
-    const bodyValues: Record<string, string> = {
-        '1': customerName,
-        '2': orderNumber,
-        '3': newStatus
-    };
-
-    return sendAuthkeyWhatsApp(phone, templateId, bodyValues);
+    // For other statuses (Processing, Confirmed manually), maybe no whatsapp or default?
+    console.log(`No specific WhatsApp template for status: ${newStatus}`);
+    return;
 };

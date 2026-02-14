@@ -19,7 +19,10 @@ export async function PATCH(
 
         const order = await prisma.order.findUnique({
             where: { id },
-            include: { user: true }
+            include: {
+                user: true,
+                items: { include: { product: true } }
+            }
         });
         if (!order) {
             return errorResponse('NOT_FOUND', 'Order not found', 404);
@@ -68,7 +71,7 @@ export async function PATCH(
                 sendOrderStatusUpdateWhatsApp(
                     customerPhone,
                     customerName,
-                    order.orderNumber,
+                    order,
                     status
                 ).catch(err => console.error('Failed to send status whatsapp:', err));
             });
