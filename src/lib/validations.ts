@@ -56,12 +56,12 @@ const productSchemaBase = z.object({
 });
 
 export const createProductSchema = productSchemaBase.refine(
-    (data) => data.originalPrice === undefined || data.originalPrice > data.price,
+    (data) => !data.originalPrice || data.originalPrice > data.price,
     { message: 'Original price must be greater than price', path: ['originalPrice'] }
 );
 
 export const updateProductSchema = productSchemaBase.partial().refine(
-    (data) => data.originalPrice === undefined || data.price === undefined || data.originalPrice > data.price,
+    (data) => !data.originalPrice || data.price === undefined || data.originalPrice > data.price,
     { message: 'Original price must be greater than price', path: ['originalPrice'] }
 );
 

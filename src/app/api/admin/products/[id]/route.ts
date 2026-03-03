@@ -61,8 +61,8 @@ export async function PATCH(
         if (input.originalPrice !== undefined) {
             updateData.originalPrice = input.originalPrice ? input.originalPrice * 100 : null;
         }
-        const effectivePrice = updateData.price ?? existing.price;
-        const effectiveOriginalPrice = updateData.originalPrice ?? existing.originalPrice;
+        const effectivePrice = (updateData.price as number | undefined) ?? existing.price;
+        const effectiveOriginalPrice = updateData.originalPrice !== undefined ? (updateData.originalPrice as number | null) : existing.originalPrice;
         if (effectiveOriginalPrice !== null && effectiveOriginalPrice <= effectivePrice) {
             return errorResponse('VALIDATION_ERROR', 'Original price must be greater than price', 400);
         }

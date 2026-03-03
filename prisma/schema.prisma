@@ -118,7 +118,7 @@ model DailySaleItem {
   dailySaleId String
   dailySale   DailySale @relation(fields: [dailySaleId], references: [id], onDelete: Cascade)
   productId   String
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   
   price       Int       // Override Price for this day
   stock       Int       // Stock available for this day
@@ -168,7 +168,7 @@ model OrderItem {
   orderId     String
   order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId   String
-  product     Product @relation(fields: [productId], references: [id])
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity    Int
   priceAtTime Int     // Snapshot of price when ordered
   

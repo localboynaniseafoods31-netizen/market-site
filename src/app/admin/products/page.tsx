@@ -40,6 +40,9 @@ export default function AdminProductsPage() {
         const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
         if (res.ok) {
             setProducts(products.filter((p) => p.id !== id));
+        } else {
+            const data = await res.json();
+            alert(data.error?.message || 'Failed to delete product');
         }
     };
 
