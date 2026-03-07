@@ -224,6 +224,7 @@ export async function completeOrderPayment(
         items: order.items.map(i => ({
             name: i.product.name,
             quantity: i.quantity,
+            weight: i.product.netWeight || undefined,
             price: i.priceAtTime
         })),
         subtotal: order.subtotal / 100,

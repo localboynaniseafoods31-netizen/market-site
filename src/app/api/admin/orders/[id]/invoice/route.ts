@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin';
 import { successResponse, errorResponse, handleApiError } from '@/lib/api-response';
+import { parseWeight } from '@/lib/utils';
 
 // GET /api/admin/orders/[id]/invoice - Generate invoice data
 export async function GET(
@@ -19,7 +20,7 @@ export async function GET(
             include: {
                 user: { select: { phone: true, name: true, email: true } },
                 items: {
-                    include: { product: { select: { name: true } } },
+                    include: { product: { select: { name: true, netWeight: true } } },
                 },
             },
         });
@@ -56,13 +57,20 @@ export async function GET(
             },
 
             // Items
-            items: order.items.map((item, idx) => ({
-                sno: idx + 1,
-                name: item.product.name,
-                quantity: item.quantity,
-                rate: item.priceAtTime / 100,
-                amount: (item.priceAtTime * item.quantity) / 100,
-            })),
+            items: order.items.map((item, idx) => {
+                const nw = item.product.netWeight;
+                const totalKg = nw ? parseWeight(nw) * item.quantity : 0;
+                const totalWeight = totalKg >= 1 ? `${totalKg}kg` : totalKg > 0 ? `${Math.round(totalKg * 1000)}g` : null;
+                return {
+                    sno: idx + 1,
+                    name: item.product.name,
+                    weight: nw,
+                    totalWeight,
+                    quantity: item.quantity,
+                    rate: item.priceAtTime / 100,
+                    amount: (item.priceAtTime * item.quantity) / 100,
+                };
+            }),
 
             // Totals
             subtotal: order.subtotal / 100,

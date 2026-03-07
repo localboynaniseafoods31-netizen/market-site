@@ -102,8 +102,8 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<Buffer> => 
 
         // ===== ITEMS TABLE =====
         const tableTop = 280;
-        const tableHeaders = ['Item', 'Qty', 'Price', 'Total'];
-        const colWidths = [250, 60, 90, 90];
+        const tableHeaders = ['Item', 'Qty', 'Weight', 'Price', 'Total'];
+        const colWidths = [200, 50, 70, 85, 85];
         let colX = 50;
 
         // Header row background
@@ -126,6 +126,18 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<Buffer> => 
         let y = tableTop + 30;
         data.items.forEach((item) => {
             const lineTotal = (item.price * item.quantity) / 100;
+            // Compute total weight
+            let totalWeightLabel = '';
+            if (item.weight) {
+                const lower = item.weight.toLowerCase().replace(/\s/g, '');
+                const value = parseFloat(lower);
+                if (!isNaN(value)) {
+                    const isKg = lower.includes('kg');
+                    const perUnitKg = isKg ? value : value / 1000;
+                    const totalKg = perUnitKg * item.quantity;
+                    totalWeightLabel = totalKg >= 1 ? `${totalKg}kg` : `${Math.round(totalKg * 1000)}g`;
+                }
+            }
             colX = 50;
 
             doc.fillColor(textColor)
@@ -137,15 +149,16 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<Buffer> => 
                 doc.fillColor(mutedColor)
                     .fontSize(8)
                     .font('Helvetica')
-                    .text(item.weight, colX, y + 12);
+                    .text(item.weight + ' / unit', colX, y + 12);
             }
 
             doc.fillColor(textColor)
                 .fontSize(10)
                 .font('Helvetica')
                 .text(String(item.quantity), colX + colWidths[0], y, { width: colWidths[1], align: 'right' })
-                .text(`₹${(item.price / 100).toFixed(2)}`, colX + colWidths[0] + colWidths[1], y, { width: colWidths[2], align: 'right' })
-                .text(`₹${lineTotal.toFixed(2)}`, colX + colWidths[0] + colWidths[1] + colWidths[2], y, { width: colWidths[3], align: 'right' });
+                .text(totalWeightLabel || '—', colX + colWidths[0] + colWidths[1], y, { width: colWidths[2], align: 'right' })
+                .text(`₹${(item.price / 100).toFixed(2)}`, colX + colWidths[0] + colWidths[1] + colWidths[2], y, { width: colWidths[3], align: 'right' })
+                .text(`₹${lineTotal.toFixed(2)}`, colX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], y, { width: colWidths[4], align: 'right' });
 
             y += item.weight ? 35 : 25;
 

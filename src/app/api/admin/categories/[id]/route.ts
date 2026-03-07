@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin';
 import { successResponse, errorResponse, handleApiError } from '@/lib/api-response';
 import { createCategorySchema } from '@/lib/validations';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/categories/[id] - Get single category
 export async function GET(
@@ -78,6 +79,8 @@ export async function PATCH(
             return updated;
         });
 
+        revalidatePath('/', 'layout');
+
         return successResponse({
             id: category.id,
             name: category.name,
@@ -129,6 +132,8 @@ export async function DELETE(
                 },
             });
         });
+
+        revalidatePath('/', 'layout');
 
         return successResponse({ deleted: true, id });
     } catch (error) {

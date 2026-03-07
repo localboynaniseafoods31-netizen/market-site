@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin';
 import { successResponse, handleApiError } from '@/lib/api-response';
 import { createCategorySchema } from '@/lib/validations';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/categories - List all categories with product counts
 export async function GET(request: NextRequest) {
@@ -73,6 +74,8 @@ export async function POST(request: NextRequest) {
 
             return newCategory;
         });
+
+        revalidatePath('/', 'layout');
 
         return successResponse({
             id: category.id,

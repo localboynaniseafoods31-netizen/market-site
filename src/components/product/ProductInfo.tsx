@@ -1,10 +1,10 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Truck, ShieldCheck, Clock, Share2, Heart, Scale, Users, CheckCircle2 } from "lucide-react";
+import { Truck, ShieldCheck, Clock, Share2, Heart, Scale, Users, CheckCircle2, Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/data/seafoodData";
-import { useAppDispatch, addToCart, useAppSelector, selectProductQuantity } from "@/store";
+import { useAppDispatch, addToCart, incrementQuantity, decrementQuantity, useAppSelector, selectProductQuantity } from "@/store";
 import { toast } from "sonner";
 
 interface ProductInfoProps {
@@ -123,16 +123,48 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                             Only {stock} items left in stock!
                         </p>
                     )}
-                    <Button
-                        size="lg"
-                        className="w-full h-14 text-lg font-bold rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={handleAddToCart}
-                        disabled={!product.inStock || (stock !== undefined && (stock === 0 || cartQuantity >= stock))}
-                    >
-                        {product.inStock && (stock === undefined || stock > 0)
-                            ? (stock !== undefined && cartQuantity >= stock ? "Limit Reached" : "Add to Cart")
-                            : "Out of Stock"}
-                    </Button>
+                    {cartQuantity > 0 ? (
+                        <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-full h-14 px-2 w-full">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 shrink-0 rounded-full hover:bg-emerald-200 hover:text-emerald-700 text-emerald-600"
+                                onClick={() => dispatch(decrementQuantity(product.id))}
+                            >
+                                <Minus className="h-5 w-5" />
+                            </Button>
+                            <div className="flex flex-col items-center justify-center flex-1">
+                                <span className="font-bold text-lg text-emerald-700 leading-none">{cartQuantity}</span>
+                                <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wider mt-0.5">In Cart</span>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 shrink-0 rounded-full hover:bg-emerald-200 hover:text-emerald-700 text-emerald-600"
+                                onClick={() => {
+                                    if (stock !== undefined && cartQuantity >= stock) {
+                                        toast.error(`Only ${stock} items available`);
+                                        return;
+                                    }
+                                    dispatch(incrementQuantity(product.id));
+                                }}
+                                disabled={stock !== undefined && cartQuantity >= stock}
+                            >
+                                <Plus className="h-5 w-5" />
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            size="lg"
+                            className="w-full h-14 text-lg font-bold rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={handleAddToCart}
+                            disabled={!product.inStock || (stock !== undefined && (stock === 0 || cartQuantity >= stock))}
+                        >
+                            {product.inStock && (stock === undefined || stock > 0)
+                                ? (stock !== undefined && cartQuantity >= stock ? "Limit Reached" : "Add to Cart")
+                                : "Out of Stock"}
+                        </Button>
+                    )}
                     <p className="text-center text-xs text-slate-500 flex items-center justify-center gap-1">
                         <Truck className="w-3 h-3" />
                         Delivery in {product.deliveryTime || "90 mins"}

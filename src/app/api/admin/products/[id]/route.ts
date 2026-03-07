@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import { requireAdmin } from '@/lib/admin';
 import { successResponse, errorResponse, handleApiError } from '@/lib/api-response';
 import { updateProductSchema } from '@/lib/validations';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/products/[id] - Get single product
 export async function GET(
@@ -90,6 +91,8 @@ export async function PATCH(
             return updated;
         });
 
+        revalidatePath('/', 'layout');
+
         return successResponse({
             id: product.id,
             name: product.name,
@@ -130,6 +133,8 @@ export async function DELETE(
                 },
             });
         });
+
+        revalidatePath('/', 'layout');
 
         return successResponse({ deleted: true, id });
     } catch (error) {

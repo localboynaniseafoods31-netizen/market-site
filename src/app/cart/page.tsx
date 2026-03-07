@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseWeight } from "@/lib/utils";
 import {
     useAppDispatch,
     useAppSelector,
@@ -111,6 +112,11 @@ export default function CartPage() {
                                         </Link>
                                         <p className="text-xs text-muted-foreground mt-1">
                                             {item.product?.netWeight} • {item.product?.serves || 'Serves 2'}
+                                            {item.product?.netWeight && item.quantity > 1 && (() => {
+                                                const totalKg = parseWeight(item.product!.netWeight) * item.quantity;
+                                                const label = totalKg >= 1 ? `${totalKg}kg` : `${Math.round(totalKg * 1000)}g`;
+                                                return <span className="ml-1 text-sky-600 font-medium"> • Total: {label}</span>;
+                                            })()}
                                         </p>
 
                                         <div className="flex flex-wrap items-center justify-between mt-2 gap-y-2">
@@ -197,7 +203,13 @@ export default function CartPage() {
                                 )}
                             </div>
 
-                            <div className="border-t border-slate-100 mt-4 pt-4">
+                            <div className="border-t border-slate-100 mt-4 pt-4 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Total Weight</span>
+                                    <span className="font-medium text-foreground">
+                                        {cartWeight >= 1 ? `${cartWeight.toFixed(1)}kg` : `${Math.round(cartWeight * 1000)}g`}
+                                    </span>
+                                </div>
                                 <div className="flex justify-between text-lg font-black">
                                     <span>Total</span>
                                     <span>₹{finalTotal}</span>

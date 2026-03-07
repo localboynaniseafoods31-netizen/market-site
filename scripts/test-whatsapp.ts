@@ -1,88 +1,84 @@
 /**
  * Test WhatsApp via Authkey.io
- * Run: npx tsx scripts/test-whatsapp.ts
+ * Run: npx tsx scripts/test-whatsapp.ts [type] [phone]
+ * Types: placed, delivered, cancelled, shipped, all
+ * Phone: Optional, defaults to env or hardcoded
  */
 
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
+import path from 'path';
 
-const AUTHKEY_API_URL = 'https://console.authkey.io/restapi/requestjson.php';
+// Load env before imports
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+import {
+    sendOrderConfirmationWhatsApp,
+    sendOrderDeliveredWhatsApp,
+    sendOrderCancelledWhatsApp,
+    sendOrderShippedWhatsApp
+} from '../src/lib/whatsapp';
 
 async function testWhatsApp() {
-    const token = process.env.AUTHKEY_TOKEN;
-    const templateId = process.env.AUTHKEY_TEMPLATE_ID || '25677';
-    const countryCode = process.env.AUTHKEY_COUNTRY_CODE || '91';
+    const args = process.argv.slice(2);
+    const type = args[0] || 'placed';
+    const phone = args[1] || '7008748856'; // Default test phone
 
-    // TEST PHONE - Replace with your number
-    const testPhone = '7008748856';
+    console.log(`🧪 Testing WhatsApp Template: ${type.toUpperCase()}`);
+    console.log(`📱 Phone: ${phone}`);
 
-    console.log('📲 WhatsApp Test Configuration:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`Token: ${token ? token.slice(0, 4) + '...' : '❌ MISSING'}`);
-    console.log(`Template ID: ${templateId}`);
-    console.log(`Country Code: ${countryCode}`);
-    console.log(`Test Phone: ${testPhone}`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-    // Template variable mapping:
-    // {{1}} = Customer Name
-    // {{2}} = Order Number  
-    // {{3}} = Amount (₹X)
-    // {{4}} = Invoice filename (for CTA button URL)
-
-    const bodyValues = {
-        '1': 'Test Customer',           // {{1}} Customer Name
-        '2': 'TEST-ORDER-001',          // {{2}} Order Number
-        '3': '₹599',                    // {{3}} Amount
-        '4': 'TEST-ORDER-001.pdf'       // {{4}} Invoice filename
+    const dummyOrder = {
+        orderNumber: 'TEST-ORD-001',
+        total: 59900, // ₹599.00
+        user: { name: 'Test User', phone: phone },
+        items: [
+            { quantity: 1, product: { name: 'Premium Surmai' } },
+            { quantity: 2, product: { name: 'Prawns Large' } }
+        ]
     };
-
-    console.log('📋 Body Values being sent:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`  {{1}} (Customer Name) = "${bodyValues['1']}"`);
-    console.log(`  {{2}} (Order Number)  = "${bodyValues['2']}"`);
-    console.log(`  {{3}} (Amount)        = "${bodyValues['3']}"`);
-    console.log(`  {{4}} (Invoice PDF)   = "${bodyValues['4']}"`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-    const payload = {
-        country_code: countryCode,
-        mobile: testPhone,
-        wid: templateId,
-        type: 'text',
-        bodyValues
-    };
-
-    console.log('📤 Sending to Authkey API...\n');
-    console.log('Full Payload:', JSON.stringify(payload, null, 2));
-    console.log('\n');
-
-    if (!token) {
-        console.error('❌ AUTHKEY_TOKEN not set in .env.local');
-        return;
-    }
 
     try {
-        const res = await fetch(AUTHKEY_API_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Basic ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.Message === 'Submitted Successfully') {
-            console.log('✅ SUCCESS! WhatsApp message submitted');
-            console.log('Response:', JSON.stringify(data, null, 2));
-        } else {
-            console.log('⚠️ API Response (check for errors):');
-            console.log(JSON.stringify(data, null, 2));
+        let res;
+        switch (type.toLowerCase()) {
+            case 'placed':
+                console.log('Sending Order Confirmation...');
+                res = await sendOrderConfirmationWhatsApp(dummyOrder);
+                break;
+            case 'delivered':
+                console.log('Sending Order Delivered...');
+                res = await sendOrderDeliveredWhatsApp(phone, 'Test User', dummyOrder.items);
+                break;
+            case 'cancelled':
+                console.log('Sending Order Cancelled...');
+                res = await sendOrderCancelledWhatsApp(phone, 'Test User', dummyOrder.items);
+                break;
+            case 'shipped':
+                console.log('Sending Order Shipped...');
+                res = await sendOrderShippedWhatsApp(phone, 'Test User', dummyOrder.items);
+                break;
+            case 'all':
+                console.log('Sending ALL templates sequentially...');
+                await sendOrderConfirmationWhatsApp(dummyOrder);
+                await new Promise(r => setTimeout(r, 2000));
+                await sendOrderDeliveredWhatsApp(phone, 'Test User', dummyOrder.items);
+                await new Promise(r => setTimeout(r, 2000));
+                await sendOrderCancelledWhatsApp(phone, 'Test User', dummyOrder.items);
+                await new Promise(r => setTimeout(r, 2000));
+                await sendOrderShippedWhatsApp(phone, 'Test User', dummyOrder.items);
+                console.log('✅ Sent all templates');
+                return;
+            default:
+                console.error('❌ Unknown type. Use: placed, delivered, cancelled, shipped, all');
+                return;
         }
+
+        if (res && res.success) {
+            console.log('✅ Success:', res.data);
+        } else {
+            console.log('❌ Failed or No Response:', res);
+        }
+
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error executing test:', error);
     }
 }
 

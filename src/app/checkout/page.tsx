@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Phone, User, ChevronRight, CheckCircle2 } from "lucide-react";
+import { parseWeight } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ type CheckoutCartItem = {
     product?: {
         title?: string;
         price?: number;
+        netWeight?: string;
     } | null;
 };
 
@@ -696,12 +698,26 @@ export default function CheckoutPage() {
                                 <h2 className="text-xl font-bold text-slate-900 mb-4">Order Summary</h2>
 
                                 <div className="space-y-3 text-sm border-b border-slate-100 pb-4 mb-4">
-                                    {cartItems.map((item: CheckoutCartItem) => (
-                                        <div key={item.productId} className="flex justify-between">
-                                            <span className="text-slate-600">{item.product?.title} × {item.quantity}</span>
-                                            <span className="font-medium">₹{item.lineTotal / 100}</span>
-                                        </div>
-                                    ))}
+                                    {cartItems.map((item: CheckoutCartItem) => {
+                                        const nw = item.product?.netWeight;
+                                        const totalWeightKg = nw ? parseWeight(nw) * item.quantity : 0;
+                                        const totalWeightLabel = totalWeightKg >= 1
+                                            ? `${totalWeightKg}kg`
+                                            : totalWeightKg > 0 ? `${Math.round(totalWeightKg * 1000)}g` : '';
+                                        return (
+                                            <div key={item.productId} className="flex justify-between">
+                                                <div className="flex flex-col">
+                                                    <span className="text-slate-600">{item.product?.title} × {item.quantity}</span>
+                                                    {nw && (
+                                                        <span className="text-xs text-slate-400">
+                                                            {nw} × {item.quantity}{totalWeightLabel ? ` = ${totalWeightLabel}` : ''}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className="font-medium">₹{item.lineTotal / 100}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="space-y-2 text-sm">

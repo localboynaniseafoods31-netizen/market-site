@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import crypto from 'crypto';
+import { parseWeight } from "@/lib/utils";
 
 // Force dynamic rendering as it depends on route params and DB data
 export const dynamic = 'force-dynamic';
@@ -111,22 +112,31 @@ export default async function InvoicePage({ params, searchParams }: InvoicePageP
                             <tr className="border-b-2 border-slate-200 text-slate-500 text-sm uppercase">
                                 <th className="py-3">Item</th>
                                 <th className="py-3 text-center">Qty</th>
+                                <th className="py-3 text-center">Weight</th>
                                 <th className="py-3 text-right">Price</th>
                                 <th className="py-3 text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody className="text-slate-700">
-                            {order.items.map((item) => (
-                                <tr key={item.id} className="border-b border-slate-100">
-                                    <td className="py-4">
-                                        <div className="font-medium text-slate-900">{item.product.name}</div>
-                                        <div className="text-xs text-slate-500">{item.quantity > 1 ? `${item.product.netWeight} x ${item.quantity}` : item.product.netWeight}</div>
-                                    </td>
-                                    <td className="py-4 text-center">{item.quantity}</td>
-                                    <td className="py-4 text-right">₹{(item.priceAtTime / 100).toFixed(2)}</td>
-                                    <td className="py-4 text-right font-medium">₹{((item.priceAtTime * item.quantity) / 100).toFixed(2)}</td>
-                                </tr>
-                            ))}
+                            {order.items.map((item) => {
+                                const nw = item.product.netWeight;
+                                const totalKg = nw ? parseWeight(nw) * item.quantity : 0;
+                                const totalLabel = totalKg >= 1
+                                    ? `${totalKg}kg`
+                                    : totalKg > 0 ? `${Math.round(totalKg * 1000)}g` : '—';
+                                return (
+                                    <tr key={item.id} className="border-b border-slate-100">
+                                        <td className="py-4">
+                                            <div className="font-medium text-slate-900">{item.product.name}</div>
+                                            <div className="text-xs text-slate-500">{nw || '—'} per unit</div>
+                                        </td>
+                                        <td className="py-4 text-center">{item.quantity}</td>
+                                        <td className="py-4 text-center text-sm font-medium">{totalLabel}</td>
+                                        <td className="py-4 text-right">₹{(item.priceAtTime / 100).toFixed(2)}</td>
+                                        <td className="py-4 text-right font-medium">₹{((item.priceAtTime * item.quantity) / 100).toFixed(2)}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
 

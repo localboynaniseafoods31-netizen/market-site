@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin';
 import { successResponse, handleApiError } from '@/lib/api-response';
 import { createProductSchema } from '@/lib/validations';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/products - List all products with full details
 export async function GET(request: NextRequest) {
@@ -92,6 +93,8 @@ export async function POST(request: NextRequest) {
 
             return newProduct;
         });
+
+        revalidatePath('/', 'layout');
 
         return successResponse({
             id: product.id,

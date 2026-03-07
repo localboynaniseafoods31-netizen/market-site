@@ -18,6 +18,7 @@ interface OrderEmailProps {
     items: {
         name: string;
         quantity: number;
+        weight?: string;
         price: number;
     }[];
     total: number;
@@ -74,17 +75,31 @@ export const sendOrderConfirmation = async (order: OrderEmailProps, email: strin
                     <tr>
                         <th>Item</th>
                         <th>Qty</th>
+                        <th>Weight</th>
                         <th>Price</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${order.items.map(item => `
+                    ${order.items.map(item => {
+        let totalWeight = '';
+        if (item.weight) {
+            const lower = item.weight.toLowerCase().replace(/\s/g, '');
+            const val = parseFloat(lower);
+            if (!isNaN(val)) {
+                const isKg = lower.includes('kg');
+                const totalKg = (isKg ? val : val / 1000) * item.quantity;
+                totalWeight = totalKg >= 1 ? `${totalKg}kg` : `${Math.round(totalKg * 1000)}g`;
+            }
+        }
+        return `
                     <tr>
-                        <td>${item.name}</td>
+                        <td>${item.name}${item.weight ? `<br><small style="color: #64748b;">${item.weight}/unit</small>` : ''}</td>
                         <td>${item.quantity}</td>
+                        <td>${totalWeight || '—'}</td>
                         <td>₹${item.price.toFixed(2)}</td>
                     </tr>
-                    `).join('')}
+                    `;
+    }).join('')}
                 </tbody>
             </table>
 
@@ -133,7 +148,19 @@ export const sendAdminNotification = async (order: OrderEmailProps, targetEmail?
         <hr/>
         <h3>Items needed:</h3>
         <ul>
-            ${order.items.map(item => `<li>${item.quantity} x ${item.name}</li>`).join('')}
+            ${order.items.map(item => {
+        let totalWeight = '';
+        if (item.weight) {
+            const lower = item.weight.toLowerCase().replace(/\s/g, '');
+            const val = parseFloat(lower);
+            if (!isNaN(val)) {
+                const isKg = lower.includes('kg');
+                const totalKg = (isKg ? val : val / 1000) * item.quantity;
+                totalWeight = totalKg >= 1 ? `${totalKg}kg` : `${Math.round(totalKg * 1000)}g`;
+            }
+        }
+        return `<li>${item.quantity} x ${item.name}${item.weight ? ` (${item.weight}/unit)` : ''}${totalWeight ? ` — Total: ${totalWeight}` : ''}</li>`;
+    }).join('')}
         </ul>
         <br/>
         <p><strong>Invoice:</strong> <a href="${order.invoiceUrl || '#'}">Download PDF</a></p>

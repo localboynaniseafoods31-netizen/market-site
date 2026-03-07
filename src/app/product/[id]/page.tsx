@@ -157,7 +157,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {/* Product Hero Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-20">
                     <ProductGallery
-                        images={product.images || [product.image]}
+                        images={product.images && product.images.length > 0 ? product.images : [product.image]}
                         title={product.title}
                     />
                     <ProductInfo product={product} />
