@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Eye, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BulkQuotesTab from '@/components/admin/BulkQuotesTab';
 
 interface Order {
     id: string;
@@ -124,12 +126,22 @@ export default function AdminOrdersPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <Tabs defaultValue="regular" className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">Orders</h1>
-                    <p className="text-muted-foreground">{orders.length} orders</p>
+                    <h1 className="text-3xl font-bold">Orders & Quotes</h1>
                 </div>
+                <TabsList>
+                    <TabsTrigger value="regular">Regular Orders</TabsTrigger>
+                    <TabsTrigger value="bulk">Bulk Quotes</TabsTrigger>
+                </TabsList>
+            </div>
+
+            <TabsContent value="regular" className="m-0 space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-bold text-muted-foreground">{orders.length} orders found</p>
+                    </div>
                 <select
                     className="h-10 px-4 border rounded-md bg-background"
                     value={statusFilter}
@@ -194,6 +206,11 @@ export default function AdminOrdersPage() {
                     </div>
                 )
             }
-        </div >
+            </TabsContent>
+
+            <TabsContent value="bulk" className="m-0">
+                <BulkQuotesTab />
+            </TabsContent>
+        </Tabs>
     );
 }

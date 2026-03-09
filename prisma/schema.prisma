@@ -35,19 +35,19 @@ enum DailySaleStatus {
 // ==================== MODELS ====================
 
 model User {
-  id        String   @id @default(uuid())
-  username  String?  @unique  // For Admin/Editor login
-  password  String?           // Hashed password
-  phone     String?  @unique  // Optional for staff, required for customers
-  email     String?           // Optional
-  name      String?
-  role      Role     @default(USER)
-  orders    Order[]
-  
+  id       String  @id @default(uuid())
+  username String? @unique // For Admin/Editor login
+  password String? // Hashed password
+  phone    String? @unique // Optional for staff, required for customers
+  email    String? // Optional
+  name     String?
+  role     Role    @default(USER)
+  orders   Order[]
+
   // Workflows
   createdSales  DailySale[] @relation("CreatedBy")
   approvedSales DailySale[] @relation("ApprovedBy")
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -57,8 +57,8 @@ model Category {
   slug           String    @unique
   name           String
   description    String?
-  icon           String?   // Path to category image
-  dealPercentage Int?      // Category-wide discount percentage
+  icon           String? // Path to category image
+  dealPercentage Int? // Category-wide discount percentage
   dealActive     Boolean   @default(false)
   products       Product[]
   createdAt      DateTime  @default(now())
@@ -66,49 +66,49 @@ model Category {
 }
 
 model Product {
-  id            String      @id @default(uuid())
-  slug          String      @unique
-  name          String
-  description   String?
-  image         String      // Main image path
-  images        String[]    // Gallery images
-  grossWeight   String      // e.g., "500g"
-  netWeight     String      // e.g., "450g"
-  price         Int         // Base Price in paisa
-  originalPrice Int?        // Base Discount Price
-  stock         Int         @default(0)  // Current Stock
-  defaultStock  Int         @default(0)  // Stock to reset to daily
-  inStock       Boolean     @default(true)
-  pieces        String?
-  serves        String?
-  sourcing      String?
-  cutType       String?
-  texture       String?
-  deliveryTime  String?
-  categoryId    String
-  category      Category    @relation(fields: [categoryId], references: [id])
-  orderItems    OrderItem[]
+  id             String          @id @default(uuid())
+  slug           String          @unique
+  name           String
+  description    String?
+  image          String // Main image path
+  images         String[] // Gallery images
+  grossWeight    String // e.g., "500g"
+  netWeight      String // e.g., "450g"
+  price          Int // Base Price in paisa
+  originalPrice  Int? // Base Discount Price
+  stock          Int             @default(0) // Current Stock
+  defaultStock   Int             @default(0) // Stock to reset to daily
+  inStock        Boolean         @default(true)
+  pieces         String?
+  serves         String?
+  sourcing       String?
+  cutType        String?
+  texture        String?
+  deliveryTime   String?
+  categoryId     String
+  category       Category        @relation(fields: [categoryId], references: [id])
+  orderItems     OrderItem[]
   dailySaleItems DailySaleItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([categoryId])
 }
 
 model DailySale {
-  id            String          @id @default(uuid())
-  date          DateTime        @unique // Only one sale config per day
-  status        DailySaleStatus @default(DRAFT)
-  items         DailySaleItem[]
-  
-  createdById   String
-  createdBy     User            @relation("CreatedBy", fields: [createdById], references: [id])
-  
-  approvedById  String?
-  approvedBy    User?           @relation("ApprovedBy", fields: [approvedById], references: [id])
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id     String          @id @default(uuid())
+  date   DateTime        @unique // Only one sale config per day
+  status DailySaleStatus @default(DRAFT)
+  items  DailySaleItem[]
+
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  approvedById String?
+  approvedBy   User?   @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([date])
 }
@@ -119,45 +119,45 @@ model DailySaleItem {
   dailySale   DailySale @relation(fields: [dailySaleId], references: [id], onDelete: Cascade)
   productId   String
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  price       Int       // Override Price for this day
-  stock       Int       // Stock available for this day
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  price Int // Override Price for this day
+  stock Int // Stock available for this day
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([dailySaleId, productId])
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  orderNumber     String      @unique
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  status          OrderStatus @default(PENDING)
-  subtotal        Int
-  deliveryFee     Int         @default(0)
-  total           Int
-  
+  id          String      @id @default(uuid())
+  orderNumber String      @unique
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  status      OrderStatus @default(PENDING)
+  subtotal    Int
+  deliveryFee Int         @default(0)
+  total       Int
+
   // Delivery Info
   deliveryName    String
   deliveryPhone   String
   deliveryAddress String
   deliveryCity    String
   deliveryPincode String
-  deliveryEmail   String?     // Added for order receipts
-  
+  deliveryEmail   String? // Added for order receipts
+
   // Payment
   paymentId       String?
-  paymentStatus   String?     // PENDING, PAID, FAILED
-  razorpayOrderId String?     @unique // Link to Razorpay Order
-  invoiceUrl      String?     // R2 URL for PDF invoice
-  
-  idempotencyKey  String?     @unique
-  
-  items           OrderItem[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  paymentStatus   String? // PENDING, PAID, FAILED
+  razorpayOrderId String? @unique // Link to Razorpay Order
+  invoiceUrl      String? // R2 URL for PDF invoice
+
+  idempotencyKey String? @unique
+
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -170,8 +170,8 @@ model OrderItem {
   productId   String
   product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity    Int
-  priceAtTime Int     // Snapshot of price when ordered
-  
+  priceAtTime Int // Snapshot of price when ordered
+
   @@index([orderId])
 }
 
@@ -199,23 +199,23 @@ enum MediaType {
 }
 
 model Media {
-  id          String    @id @default(uuid())
-  filename    String    // Original filename
-  key         String    @unique  // R2 object key
-  url         String    // Public URL
-  type        MediaType @default(OTHER)
-  size        Int       // Bytes
-  width       Int?
-  height      Int?
-  mimeType    String
-  uploadedBy  String?
-  createdAt   DateTime  @default(now())
+  id         String    @id @default(uuid())
+  filename   String // Original filename
+  key        String    @unique // R2 object key
+  url        String // Public URL
+  type       MediaType @default(OTHER)
+  size       Int // Bytes
+  width      Int?
+  height     Int?
+  mimeType   String
+  uploadedBy String?
+  createdAt  DateTime  @default(now())
 }
 
 model SaleBanner {
   id        String    @id @default(uuid())
   title     String
-  imageUrl  String    // R2 URL
+  imageUrl  String // R2 URL
   linkUrl   String?
   isActive  Boolean   @default(true)
   position  Int       @default(0)
@@ -229,12 +229,12 @@ model SaleBanner {
 
 model CrazyDeal {
   id          String   @id @default(uuid())
-  title       String   // e.g., "Weekend Splash Sale"
-  subtitle    String   // e.g., "Flat 20% OFF on Prawns"
+  title       String // e.g., "Weekend Splash Sale"
+  subtitle    String // e.g., "Flat 20% OFF on Prawns"
   description String?
   bgColor     String   @default("from-sky-500 to-blue-600") // Tailwind gradient
-  imageUrl    String   // R2 URL
-  promoCode   String?  // e.g., "WEEKEND20"
+  imageUrl    String // R2 URL
+  promoCode   String? // e.g., "WEEKEND20"
   linkUrl     String   @default("/category/deals")
   isActive    Boolean  @default(true)
   position    Int      @default(0)
@@ -242,3 +242,21 @@ model CrazyDeal {
   updatedAt   DateTime @updatedAt
 }
 
+// ==================== QUOTE REQUESTS (Bulk Orders) ====================
+
+enum QuoteStatus {
+  PENDING
+  CONTACTED
+  COMPLETED
+}
+
+model BulkQuote {
+  id           String      @id @default(uuid())
+  name         String
+  phone        String
+  eventType    String?
+  requirements String?     @db.Text
+  status       QuoteStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}

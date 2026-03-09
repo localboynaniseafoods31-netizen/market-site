@@ -11,6 +11,8 @@ import FAQSection from "@/components/home/FAQSection";
 import Footer from "@/components/layout/Footer";
 import { SITE_NAME, SITE_DESCRIPTION } from '@/config';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: `${SITE_NAME} - Premium Seafood Delivery`,
     description: SITE_DESCRIPTION,

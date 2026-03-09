@@ -20,19 +20,43 @@ export function RequestQuoteDialog({ children }: { children: React.ReactNode }) 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [formData, setFormData] = useState({
+        name: "",
+        phone: "",
+        eventType: "",
+        details: ""
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const res = await fetch('/api/quotes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    phone: formData.phone,
+                    eventType: formData.eventType,
+                    requirements: formData.details
+                })
+            });
+
+            if (res.ok) {
+                setSuccess(true);
+                setTimeout(() => {
+                    setOpen(false);
+                    setSuccess(false);
+                    setFormData({ name: "", phone: "", eventType: "", details: "" });
+                }, 2000);
+            } else {
+                console.error("Failed to submit quote");
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
             setLoading(false);
-            setSuccess(true);
-            // Reset after showing success
-            setTimeout(() => {
-                setOpen(false);
-                setSuccess(false);
-            }, 2000);
-        }, 1500);
+        }
     };
 
     return (
@@ -62,22 +86,22 @@ export function RequestQuoteDialog({ children }: { children: React.ReactNode }) 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="text-xs font-bold text-slate-500 uppercase">Name</Label>
-                                    <Input id="name" required placeholder="Arun Kumar" className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500" />
+                                    <Input id="name" required placeholder="Arun Kumar" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="mobile" className="text-xs font-bold text-slate-500 uppercase">Phone</Label>
-                                    <Input id="mobile" required type="tel" placeholder="98765 43210" className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500" />
+                                    <Input id="mobile" required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500" />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="type" className="text-xs font-bold text-slate-500 uppercase">Event Type</Label>
-                                <Input id="type" placeholder="Wedding, Party, Festival..." className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500" />
+                                <Input id="type" placeholder="Wedding, Party, Festival..." value={formData.eventType} onChange={(e) => setFormData(prev => ({ ...prev, eventType: e.target.value }))} className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500" />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="details" className="text-xs font-bold text-slate-500 uppercase">Requirement</Label>
-                                <Textarea id="details" placeholder="E.g. 50kg Seer Fish, 20kg Prawns..." className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500 min-h-[80px]" />
+                                <Textarea id="details" placeholder="E.g. 50kg Seer Fish, 20kg Prawns..." value={formData.details} onChange={(e) => setFormData(prev => ({ ...prev, details: e.target.value }))} className="bg-slate-50 border-slate-200 focus-visible:ring-orange-500 min-h-[80px]" />
                             </div>
 
                             <Button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 rounded-xl mt-2">

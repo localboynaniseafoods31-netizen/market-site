@@ -301,3 +301,48 @@ export const sendOrderStatusUpdateEmail = async (
         console.error('❌ Failed to send status update email:', error);
     }
 };
+
+export interface QuoteEmailProps {
+    name: string;
+    phone: string;
+    eventType?: string | null;
+    requirements?: string | null;
+    date: Date;
+}
+
+export const sendAdminQuoteAlert = async (quote: QuoteEmailProps, targetEmail?: string) => {
+    const html = `
+        <h2>New Custom/Bulk Quote Request 🎉</h2>
+        <p><strong>Name:</strong> ${quote.name}</p>
+        <p><strong>Phone:</strong> <a href="tel:${quote.phone}">${quote.phone}</a></p>
+        <p><strong>Event Type:</strong> ${quote.eventType || 'Not specified'}</p>
+        <hr/>
+        <h3>Requirements:</h3>
+        <p style="white-space: pre-wrap; font-family: monospace;">${quote.requirements || 'None provided'}</p>
+        <hr/>
+        <p><em>Submitted on: ${quote.date.toLocaleString()}</em></p>
+        <p>View all quotes in the <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://market-site-eta.vercel.app'}/admin/orders">Admin Dashboard</a>.</p>
+    `;
+
+    try {
+        const toEmail = targetEmail || process.env.SMTP_USER || 'admin@localboynaniseafoods.com';
+        if (!process.env.SMTP_HOST) {
+            console.log('---------------------------------------------------');
+            console.log(`📧 MOCK QUOTE EMAIL TO: ${toEmail}`);
+            console.log(`Subject: New Bulk Quote Request from ${quote.name}`);
+            console.log('---------------------------------------------------');
+            return;
+        }
+
+        await transporter.sendMail({
+            from: '"Quote Bot" <orders@localboynaniseafoods.com>',
+            to: toEmail,
+            subject: `🚨 New Bulk Quote Request from ${quote.name}`,
+            html,
+        });
+        console.log(`✅ Quote email sent to ${toEmail}`);
+    } catch (error) {
+        console.error('❌ Failed to send quote email:', error);
+    }
+};
+
