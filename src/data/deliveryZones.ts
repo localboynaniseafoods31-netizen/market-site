@@ -6,7 +6,7 @@
 export interface DeliveryZone {
     pincode: string;
     locality: string;
-    state: 'AP' | 'TG' | 'KA' | 'OR' | 'TN';
+    state: 'AP' | 'TG' | 'KA' | 'OR' | 'TN' | 'MH';
     minOrder: number; // in rupees
     eta: string;
     charge: number; // delivery charge
@@ -320,14 +320,31 @@ export function checkDeliveryAvailability(pincode: string): DeliveryCheckResult 
         };
     }
 
-    // Check if it's close to a serviceable area (same first 3 digits)
-    const prefix = cleanPincode.slice(0, 3);
-    const nearbyZone = DELIVERY_ZONES.find(z => z.pincode.startsWith(prefix));
+    // Dynamic state/city matching for broadly allowed regions
+    const prefix2 = cleanPincode.slice(0, 2);
+    const prefix3 = cleanPincode.slice(0, 3);
+    
+    let dynamicZone: DeliveryZone | null = null;
 
-    if (nearbyZone) {
+    if (['51', '52', '53'].includes(prefix2)) {
+        dynamicZone = { pincode: cleanPincode, locality: 'Andhra Pradesh', state: 'AP', minOrder: 450, eta: '18-24 hrs', charge: 200 };
+    } else if (['75', '76', '77'].includes(prefix2)) {
+        dynamicZone = { pincode: cleanPincode, locality: 'Odisha', state: 'OR', minOrder: 500, eta: '18-24 hrs', charge: 250 };
+    } else if (['40', '41', '42', '43', '44'].includes(prefix2)) {
+        dynamicZone = { pincode: cleanPincode, locality: 'Maharashtra', state: 'MH', minOrder: 500, eta: '18-24 hrs', charge: 250 };
+    } else if (['600', '601', '602'].includes(prefix3)) {
+        dynamicZone = { pincode: cleanPincode, locality: 'Chennai', state: 'TN', minOrder: 500, eta: '18-24 hrs', charge: 250 };
+    } else if (['500', '501', '502'].includes(prefix3)) {
+        dynamicZone = { pincode: cleanPincode, locality: 'Hyderabad', state: 'TG', minOrder: 450, eta: '18-24 hrs', charge: 250 };
+    } else if (['560', '561', '562'].includes(prefix3)) {
+        dynamicZone = { pincode: cleanPincode, locality: 'Bangalore', state: 'KA', minOrder: 450, eta: '18-24 hrs', charge: 250 };
+    }
+
+    if (dynamicZone) {
         return {
-            available: false,
-            message: `Coming soon to your area! We deliver to nearby ${nearbyZone.locality}.`
+            available: true,
+            zone: dynamicZone,
+            message: `Delivers in ${dynamicZone.eta} • Delivery ₹${dynamicZone.charge}`
         };
     }
 
@@ -341,7 +358,7 @@ export function checkDeliveryAvailability(pincode: string): DeliveryCheckResult 
  * Get all serviceable states
  */
 export function getServiceableStates(): string[] {
-    return ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Orissa', 'Tamil Nadu'];
+    return ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Orissa', 'Tamil Nadu', 'Maharashtra'];
 }
 
 /**
