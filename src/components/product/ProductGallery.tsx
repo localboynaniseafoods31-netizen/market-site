@@ -16,7 +16,7 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
     const [isZoomed, setIsZoomed] = useState(false);
 
     // Ensure we have at least one image
-    const displayImages = images.length > 0 ? images : ["/images/placeholder.png"];
+    const displayImages = images.length > 0 ? images : ['https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png'];
 
     const nextImage = () => {
         setSelectedImage((prev) => (prev + 1) % displayImages.length);

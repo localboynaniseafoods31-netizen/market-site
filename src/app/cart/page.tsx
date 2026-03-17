@@ -96,7 +96,7 @@ export default function CartPage() {
                                     {/* Product Image */}
                                     <Link href={`/product/${item.productId}`} className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
                                         <Image
-                                            src={item.product?.image || '/images/placeholder.png'}
+                                            src={item.product?.image || 'https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png'}
                                             alt={item.product?.title || 'Product'}
                                             fill
                                             className="object-cover"

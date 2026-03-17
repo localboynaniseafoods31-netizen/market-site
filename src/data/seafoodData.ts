@@ -62,8 +62,8 @@ const MARINE_FISH_PRODUCTS: Product[] = [
     {
         id: "mf-1",
         title: "Premium Seer Fish / Vanjaram - Steaks",
-        image: "/images/categories/marine_v3.png",
-        images: ["/images/categories/marine_v3.png", "/images/categories/marine_v3.png", "/images/categories/marine_v3.png"],
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png",
+        images: ["https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png", "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png", "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png"],
         grossWeight: "500g",
         netWeight: "450g",
         price: 720,
@@ -83,7 +83,7 @@ const MARINE_FISH_PRODUCTS: Product[] = [
     {
         id: "mf-2",
         title: "Black Pomfret - Whole Cleaned",
-        image: "/images/categories/marine_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png",
         grossWeight: "500g",
         netWeight: "400g",
         price: 600,
@@ -104,7 +104,7 @@ const MARINE_FISH_PRODUCTS: Product[] = [
     {
         id: "mf-3",
         title: "King Fish / Surmai - Curry Cut",
-        image: "/images/categories/marine_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png",
         grossWeight: "500g",
         netWeight: "450g",
         price: 550,
@@ -119,7 +119,7 @@ const MARINE_FISH_PRODUCTS: Product[] = [
     {
         id: "mf-4",
         title: "Mackerel / Bangda - Whole",
-        image: "/images/categories/marine_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png",
         grossWeight: "500g",
         netWeight: "480g",
         price: 280,
@@ -138,7 +138,7 @@ const RIVER_FISH_PRODUCTS: Product[] = [
     {
         id: "rf-1",
         title: "Fresh Rohu - Medium Cuts",
-        image: "/images/categories/river_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/river_v3.png",
         grossWeight: "1kg",
         netWeight: "900g",
         price: 280,
@@ -152,7 +152,7 @@ const RIVER_FISH_PRODUCTS: Product[] = [
     {
         id: "rf-2",
         title: "Katla Fish - Steaks",
-        image: "/images/categories/river_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/river_v3.png",
         grossWeight: "500g",
         netWeight: "450g",
         price: 280,
@@ -164,7 +164,7 @@ const RIVER_FISH_PRODUCTS: Product[] = [
     {
         id: "rf-3",
         title: "Bhetki / Barramundi - Boneless",
-        image: "/images/categories/river_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/river_v3.png",
         grossWeight: "500g",
         netWeight: "400g",
         price: 450,
@@ -181,7 +181,7 @@ const PRAWNS_PRODUCTS: Product[] = [
     {
         id: "pr-1",
         title: "Fresh Tiger Prawns (Cleaned)",
-        image: "/images/categories/prawns_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/prawns_v3.png",
         grossWeight: "500g",
         netWeight: "350g",
         price: 450,
@@ -195,7 +195,7 @@ const PRAWNS_PRODUCTS: Product[] = [
     {
         id: "pr-2",
         title: "Jumbo Prawns - Headless",
-        image: "/images/categories/prawns_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/prawns_v3.png",
         grossWeight: "500g",
         netWeight: "400g",
         price: 650,
@@ -207,7 +207,7 @@ const PRAWNS_PRODUCTS: Product[] = [
     {
         id: "pr-3",
         title: "Medium Prawns - Whole",
-        image: "/images/categories/prawns_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/prawns_v3.png",
         grossWeight: "500g",
         netWeight: "450g",
         price: 380,
@@ -224,7 +224,7 @@ const CRABS_PRODUCTS: Product[] = [
     {
         id: "cr-1",
         title: "Premium Blue Crabs",
-        image: "/images/categories/crabs_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/crabs_v3.png",
         grossWeight: "1kg",
         netWeight: "900g",
         price: 650,
@@ -237,7 +237,7 @@ const CRABS_PRODUCTS: Product[] = [
     {
         id: "cr-2",
         title: "Mud Crabs - Large",
-        image: "/images/categories/crabs_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/crabs_v3.png",
         grossWeight: "500g",
         netWeight: "450g",
         price: 550,
@@ -251,7 +251,7 @@ const RTC_PRODUCTS: Product[] = [
     {
         id: "rtc-1",
         title: "Marinated Fish Fry Cuts",
-        image: "/images/categories/rtc_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/rtc_v3.png",
         grossWeight: "250g",
         netWeight: "250g",
         price: 350,
@@ -264,7 +264,7 @@ const RTC_PRODUCTS: Product[] = [
     {
         id: "rtc-2",
         title: "Prawn Masala - Ready to Cook",
-        image: "/images/categories/rtc_v3.png",
+        image: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/rtc_v3.png",
         grossWeight: "300g",
         netWeight: "300g",
         price: 420,
@@ -280,7 +280,7 @@ export const CATEGORIES: Category[] = [
     {
         slug: "marine-fish",
         name: "Marine Fish",
-        icon: "/images/categories/marine_v3.png",
+        icon: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/marine_v3.png",
         description: "Fresh catch from the ocean",
         banner: {
             image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200",
@@ -296,7 +296,7 @@ export const CATEGORIES: Category[] = [
     {
         slug: "river-fish",
         name: "River Fish",
-        icon: "/images/categories/river_v3.png",
+        icon: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/river_v3.png",
         description: "Freshwater favorites",
         banner: {
             image: "https://images.unsplash.com/photo-1534080564583-6be75777b70a?q=80&w=1200",
@@ -312,7 +312,7 @@ export const CATEGORIES: Category[] = [
     {
         slug: "prawns",
         name: "Prawns & Shrimp",
-        icon: "/images/categories/prawns_v3.png",
+        icon: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/prawns_v3.png",
         description: "Succulent prawns and shrimp",
         banner: {
             image: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?q=80&w=1200",
@@ -328,7 +328,7 @@ export const CATEGORIES: Category[] = [
     {
         slug: "crabs",
         name: "Crabs & Lobster",
-        icon: "/images/categories/crabs_v3.png",
+        icon: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/crabs_v3.png",
         description: "Fresh crabs and lobster",
         filters: ["All", "Live", "Cleaned", "Meat Only"],
         products: CRABS_PRODUCTS
@@ -336,7 +336,7 @@ export const CATEGORIES: Category[] = [
     {
         slug: "ready-to-cook",
         name: "Ready to Cook",
-        icon: "/images/categories/rtc_v3.png",
+        icon: "https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/categories/rtc_v3.png",
         description: "Marinated and ready to cook",
         banner: {
             image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523e?q=80&w=1200",

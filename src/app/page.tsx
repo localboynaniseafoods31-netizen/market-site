@@ -77,7 +77,7 @@ export default async function V2Page() {
         .map(c => ({
             id: c.id,
             name: c.name,
-            image: c.icon || '/images/placeholder.png', // Fallback
+            image: c.icon || 'https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png', // Fallback
             slug: c.slug
         }));
 

@@ -159,7 +159,7 @@ export default function CategorySidebar({ categories: propCategories }: Category
                                             isActive ? "border-sky-300 shadow-md" : "border-slate-200"
                                         )}>
                                             <Image
-                                                src={category.icon || "/images/placeholder.png"}
+                                                src={category.icon || 'https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png'}
                                                 alt={category.name}
                                                 fill
                                                 className="object-cover"
@@ -277,7 +277,7 @@ export default function CategorySidebar({ categories: propCategories }: Category
                                                 : "border-slate-200 group-hover:border-slate-300"
                                         )}>
                                             <Image
-                                                src={category.icon || "/images/placeholder.png"}
+                                                src={category.icon || 'https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png'}
                                                 alt={category.name}
                                                 fill
                                                 className="object-cover"

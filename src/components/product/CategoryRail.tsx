@@ -39,7 +39,7 @@ export function CategoryRail({ categories }: CategoryRailProps) {
                             >
                                 <div className="w-16 h-16 md:w-28 md:h-28 relative rounded-full overflow-hidden bg-muted border-2 border-transparent group-hover:border-primary transition-all">
                                     <Image
-                                        src={cat.image || '/images/placeholder.png'}
+                                        src={cat.image || 'https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png'}
                                         alt={cat.name}
                                         fill
                                         className="object-cover p-1 group-hover:scale-110 transition-transform duration-300"

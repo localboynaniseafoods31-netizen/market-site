@@ -19,7 +19,7 @@ export default async function AllCategoriesPage() {
         .map(c => ({
             id: c.id,
             name: c.name,
-            image: c.icon || '/images/placeholder.png',
+            image: c.icon || 'https://pub-933f2ca73d7840ab9a8608288c2e1996.r2.dev/images/other/placeholder.png',
             slug: c.slug,
             description: c.description || "Fresh and premium quality"
         }));
