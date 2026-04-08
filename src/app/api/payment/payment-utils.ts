@@ -67,6 +67,9 @@ export async function markOrderPaymentFailed(
         }
 
         return order;
+    }, {
+        maxWait: 5000,
+        timeout: 10000
     });
 
     return { success: true, message: 'Order marked as failed', order: updatedOrder, restocked: shouldRestock };
@@ -142,6 +145,9 @@ export async function completeOrderPayment(
             },
             include: { items: { include: { product: true } }, user: true }
         });
+    }, {
+        maxWait: 5000,
+        timeout: 10000
     });
 
     // 3. Generate PDF Invoice & Upload to R2

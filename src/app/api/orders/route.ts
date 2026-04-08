@@ -153,6 +153,9 @@ export async function POST(req: NextRequest) {
             });
 
             return { order, orderItemsData, user, serverSubtotal, serverDeliveryFee, serverTotal };
+        }, {
+            maxWait: 5000,
+            timeout: 10000
         });
 
         const { order, serverTotal } = result;
