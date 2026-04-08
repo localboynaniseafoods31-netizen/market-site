@@ -81,8 +81,11 @@ export async function POST(req: NextRequest) {
             failureToken
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Payment Init Failed:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ 
+            error: error?.message || 'Payment Creation Failed', 
+            details: error?.error || error 
+        }, { status: 500 });
     }
 }

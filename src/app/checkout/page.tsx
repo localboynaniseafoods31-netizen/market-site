@@ -301,7 +301,7 @@ export default function CheckoutPage() {
             const paymentData = await paymentRes.json();
 
             if (!paymentData.id) {
-                alert('Payment init failed');
+                alert(`Payment init failed: ${paymentData.error || paymentData.details ? JSON.stringify(paymentData.details) : 'Unknown error'}`);
                 setIsProcessing(false);
                 return;
             }
