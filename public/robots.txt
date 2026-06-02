@@ -1,8 +1,176 @@
+# ================================================================
+# SECTION 1: AI & CRAWLER BOT DISALLOWS (Opt-out from AI training)
+# ================================================================
+
+# OpenAI (ChatGPT)
+User-agent: GPTBot
+Disallow: /
+
+# OpenAI content crawler
+User-agent: ChatGPT-User
+Disallow: /
+
+# OpenAI search
+User-agent: OAI-SearchBot
+Disallow: /
+
+# Google AI (Gemini / Bard)
+User-agent: Google-Extended
+Disallow: /
+
+# Anthropic (Claude)
+User-agent: anthropic-ai
+Disallow: /
+
+# Anthropic Claude
+User-agent: ClaudeBot
+Disallow: /
+
+# Anthropic Crawler
+User-agent: AnthropicCrawler
+Disallow: /
+
+# Meta AI crawler
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+# Apple AI
+User-agent: Applebot-Extended
+Disallow: /
+
+# Amazon Alexa
+User-agent: Amazonbot
+Disallow: /
+
+# Common Crawl (used by many AI models)
+User-agent: CCBot
+Disallow: /
+
+# Cohere AI
+User-agent: cohere-ai
+Disallow: /
+
+# AI21 Labs
+User-agent: AI21Labs
+Disallow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Disallow: /
+
+# Perplexity User Agent
+User-agent: Perplexity-User
+Disallow: /
+
+# You.com AI
+User-agent: YouBot
+Disallow: /
+
+# Diffbot (AI data extraction)
+User-agent: Diffbot
+Disallow: /
+
+# Bytedance / TikTok AI
+User-agent: Bytespider
+Disallow: /
+
+# Scrapy (general scraper)
+User-agent: Scrapy
+Disallow: /
+
+# ImagesiftBot
+User-agent: ImagesiftBot
+Disallow: /
+
+# PetalBot AI
+User-agent: PetalBot
+Disallow: /
+
+# Omgili AI
+User-agent: omgili
+Disallow: /
+
+# Omgilibot
+User-agent: omgilibot
+Disallow: /
+
+# DataForSeoBot
+User-agent: DataForSeoBot
+Disallow: /
+
+# Magpie-Crawler (AI training data)
+User-agent: Magpie-Crawler
+Disallow: /
+
+# Nicecrawler
+User-agent: nicecrawler
+Disallow: /
+
+# ================================================================
+# SECTION 2: SEARCH ENGINE CRAWLERS - ALLOWED (Good for SEO)
+# ================================================================
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /editor
+Disallow: /cart
+Disallow: /orders
+Disallow: /login
+Disallow: /checkout
+Disallow: /account
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /editor
+Disallow: /cart
+Disallow: /orders
+Disallow: /login
+Disallow: /checkout
+Disallow: /account
+Disallow: /api/
+
+User-agent: Slurp
+Allow: /
+Disallow: /admin
+Disallow: /editor
+Disallow: /cart
+Disallow: /orders
+Disallow: /login
+Disallow: /checkout
+Disallow: /account
+Disallow: /api/
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin
+Disallow: /editor
+Disallow: /cart
+Disallow: /orders
+Disallow: /login
+Disallow: /checkout
+Disallow: /account
+Disallow: /api/
+
+# ================================================================
+# SECTION 3: ALL OTHER BOTS - DEFAULT RULES
+# ================================================================
+
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /api/
+Disallow: /admin
+Disallow: /editor
 Disallow: /cart
+Disallow: /orders
+Disallow: /login
 Disallow: /checkout
+Disallow: /account
+Disallow: /api/
+
+# ================================================================
+# SITEMAP
+# ================================================================
 
 Sitemap: https://localboynaniseafoods.com/sitemap.xml
