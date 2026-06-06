@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Phone, User, ChevronRight, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Phone, User, ChevronRight } from "lucide-react";
+import { ROUTES } from "@/config/routes";
 import { parseWeight } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,6 +89,7 @@ const loadRazorpayScript = () => {
 };
 
 export default function CheckoutPage() {
+    const router = useRouter();
     const dispatch = useAppDispatch();
     const cartItems = useAppSelector(selectCartItemsWithDetails);
     const rawCartTotal = useAppSelector(selectCartTotal);
@@ -110,10 +113,7 @@ export default function CheckoutPage() {
         pincode: defaultAddress?.pincode || locationState?.pincode || '', // Pre-fill from location
         city: defaultAddress?.city || '',
     });
-    const [isOrderPlaced, setIsOrderPlaced] = useState(false);
-    const [orderId, setOrderId] = useState<string | null>(null);
     const [lookupLoading, setLookupLoading] = useState(false);
-    const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -405,14 +405,11 @@ export default function CheckoutPage() {
         }));
 
         dispatch(clearCart());
-        setIsOrderPlaced(true);
-        setOrderId(orderNumber);
-        if (invoice) setInvoiceUrl(invoice);
         setIsProcessing(false);
+        router.push(ROUTES.THANK_YOU);
     };
 
-    // Redirect if cart is empty (and order not just placed)
-    if (cartItems.length === 0 && !isOrderPlaced) {
+    if (cartItems.length === 0) {
         return (
             <div className="min-h-screen bg-background pt-24 md:pt-32">
                 <div className="container mx-auto px-4 max-w-lg text-center">
@@ -420,57 +417,6 @@ export default function CheckoutPage() {
                     <Link href="/category">
                         <Button>Continue Shopping</Button>
                     </Link>
-                </div>
-            </div>
-        );
-    }
-
-    // Order Success Screen
-    if (isOrderPlaced) {
-        return (
-            <div className="min-h-screen bg-background pt-24 md:pt-32">
-                <div className="container mx-auto px-4 max-w-lg">
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="bg-card rounded-3xl p-8 text-center shadow-sm border border-border"
-                    >
-                        <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                            <CheckCircle2 className="w-10 h-10 text-green-600" />
-                        </div>
-                        <h1 className="text-2xl font-black text-slate-900 mb-2">Payment Successful!</h1>
-                        <p className="text-slate-500 mb-6">
-                            Your order #{orderId} has been confirmed.
-                        </p>
-
-                        {invoiceUrl && (
-                            <div className="mb-6">
-                                <a
-                                    href={invoiceUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center px-4 py-2 bg-sky-100 text-sky-700 rounded-lg hover:bg-sky-200 transition-colors font-medium text-sm"
-                                >
-                                    📄 Download Invoice
-                                </a>
-                            </div>
-                        )}
-
-                        <div className="bg-muted/50 rounded-xl p-4 mb-6 text-left">
-                            <p className="text-sm text-slate-500 mb-1">Delivering to</p>
-                            <p className="font-medium text-slate-900">{name}</p>
-                            <p className="text-sm text-slate-600">{addressInput.fullAddress}</p>
-                            <p className="text-sm text-slate-600">{addressInput.city} - {addressInput.pincode}</p>
-                        </div>
-                        <div className="flex gap-3">
-                            <Link href="/" className="flex-1">
-                                <Button variant="outline" className="w-full">Home</Button>
-                            </Link>
-                            <Link href="/category" className="flex-1">
-                                <Button className="w-full">Shop More</Button>
-                            </Link>
-                        </div>
-                    </motion.div>
                 </div>
             </div>
         );

@@ -27,6 +27,9 @@ export const ROUTES = {
     // Auth (placeholder for future)
     LOGIN: '/login',
     REGISTER: '/register',
+
+    // Misc
+    THANK_YOU: '/thank-you',
 } as const;
 
 /**
