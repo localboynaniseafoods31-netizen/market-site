@@ -332,10 +332,11 @@ export function checkDeliveryAvailability(pincode: string): DeliveryCheckResult 
         dynamicZone = { pincode: cleanPincode, locality: 'Odisha', state: 'OR', minOrder: 500, eta: '18-24 hrs', charge: 250 };
     } else if (['40', '41', '42', '43', '44'].includes(prefix2)) {
         dynamicZone = { pincode: cleanPincode, locality: 'Maharashtra', state: 'MH', minOrder: 500, eta: '18-24 hrs', charge: 250 };
+    } else if (prefix2 === '50') {
+        // All Telangana pincodes (50xxxx): Hyderabad, Warangal, Khammam, Nizamabad, etc.
+        dynamicZone = { pincode: cleanPincode, locality: 'Telangana', state: 'TG', minOrder: 450, eta: '18-24 hrs', charge: 250 };
     } else if (['600', '601', '602'].includes(prefix3)) {
         dynamicZone = { pincode: cleanPincode, locality: 'Chennai', state: 'TN', minOrder: 500, eta: '18-24 hrs', charge: 250 };
-    } else if (['500', '501', '502'].includes(prefix3)) {
-        dynamicZone = { pincode: cleanPincode, locality: 'Hyderabad', state: 'TG', minOrder: 450, eta: '18-24 hrs', charge: 250 };
     } else if (['560', '561', '562'].includes(prefix3)) {
         dynamicZone = { pincode: cleanPincode, locality: 'Bangalore', state: 'KA', minOrder: 450, eta: '18-24 hrs', charge: 250 };
     }
