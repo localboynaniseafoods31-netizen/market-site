@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
                     ...input,
                     price: input.price * 100, // Convert to paisa
                     originalPrice: input.originalPrice ? input.originalPrice * 100 : null,
+                    inStock: input.stock > 0,
                 },
                 include: { category: { select: { slug: true, name: true } } },
             });

@@ -62,6 +62,10 @@ export async function PATCH(
         if (input.originalPrice !== undefined) {
             updateData.originalPrice = input.originalPrice ? input.originalPrice * 100 : null;
         }
+        // Keep storefront visibility in sync with stock quantity
+        if (input.stock !== undefined) {
+            updateData.inStock = input.stock > 0;
+        }
         const effectivePrice = (updateData.price as number | undefined) ?? existing.price;
         const effectiveOriginalPrice = updateData.originalPrice !== undefined ? (updateData.originalPrice as number | null) : existing.originalPrice;
         if (effectiveOriginalPrice !== null && effectiveOriginalPrice <= effectivePrice) {
