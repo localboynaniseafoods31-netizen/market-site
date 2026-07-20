@@ -3,13 +3,24 @@
  * Based on shipping data - pincodes, minimum orders, and ETAs
  */
 
+import { DELIVERY_CHARGE_AP, DELIVERY_CHARGE_OUTSIDE_AP } from '@/config/constants';
+
 export interface DeliveryZone {
     pincode: string;
     locality: string;
     state: 'AP' | 'TG' | 'KA' | 'OR' | 'TN' | 'MH';
     minOrder: number; // in rupees
     eta: string;
-    charge: number; // delivery charge
+    charge: number; // delivery charge (derived from state via getDeliveryChargeForState)
+}
+
+/** Transport charge: ₹250 within AP, ₹350 outside AP */
+export function getDeliveryChargeForState(state: DeliveryZone['state']): number {
+    return state === 'AP' ? DELIVERY_CHARGE_AP : DELIVERY_CHARGE_OUTSIDE_AP;
+}
+
+function withStateCharge(zone: DeliveryZone): DeliveryZone {
+    return { ...zone, charge: getDeliveryChargeForState(zone.state) };
 }
 
 // All serviceable pincodes
@@ -313,10 +324,11 @@ export function checkDeliveryAvailability(pincode: string): DeliveryCheckResult 
     const zone = pincodeMap.get(cleanPincode);
 
     if (zone) {
+        const zoned = withStateCharge(zone);
         return {
             available: true,
-            zone,
-            message: `Delivers in ${zone.eta} • Delivery ₹${zone.charge}`
+            zone: zoned,
+            message: `Delivers in ${zoned.eta} • Delivery ₹${zoned.charge}`
         };
     }
 
@@ -342,10 +354,11 @@ export function checkDeliveryAvailability(pincode: string): DeliveryCheckResult 
     }
 
     if (dynamicZone) {
+        const zoned = withStateCharge(dynamicZone);
         return {
             available: true,
-            zone: dynamicZone,
-            message: `Delivers in ${dynamicZone.eta} • Delivery ₹${dynamicZone.charge}`
+            zone: zoned,
+            message: `Delivers in ${zoned.eta} • Delivery ₹${zoned.charge}`
         };
     }
 

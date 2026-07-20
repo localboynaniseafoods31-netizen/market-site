@@ -6,7 +6,9 @@
 // Delivery
 export const DELIVERY_FREE_THRESHOLD = 500; // Deprecated: Replaced by weight-based rule
 export const DELIVERY_FREE_WEIGHT_THRESHOLD_KG = 20; // Free delivery if weight >= 20kg
-export const DELIVERY_FEE = 49;
+export const DELIVERY_CHARGE_AP = 250; // Transport charge within Andhra Pradesh
+export const DELIVERY_CHARGE_OUTSIDE_AP = 350; // Transport charge outside Andhra Pradesh
+export const DELIVERY_FEE = DELIVERY_CHARGE_AP; // Legacy alias
 export const DELIVERY_TIMES = [
     'Today 6AM - 8AM',
     'Today 10AM - 12PM',

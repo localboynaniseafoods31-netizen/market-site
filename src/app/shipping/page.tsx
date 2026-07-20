@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_NAME } from '@/config';
 import { Truck, Clock, MapPin } from 'lucide-react';
-import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG } from '@/config/constants';
+import { DELIVERY_FREE_WEIGHT_THRESHOLD_KG, DELIVERY_CHARGE_AP, DELIVERY_CHARGE_OUTSIDE_AP } from '@/config/constants';
 
 export const metadata: Metadata = {
     title: `Shipping Policy - ${SITE_NAME}`,
@@ -35,8 +35,12 @@ export default function ShippingPage() {
                 <div className="prose prose-slate dark:prose-invert max-w-none">
                     <h3>Delivery Fee</h3>
                     <p>
-                        Delivery charges are <strong>pincode-based</strong> as per our shipping sheet configuration.
+                        Transport charges are based on delivery location:
                     </p>
+                    <ul>
+                        <li><strong>Within Andhra Pradesh:</strong> ₹{DELIVERY_CHARGE_AP}</li>
+                        <li><strong>Outside Andhra Pradesh:</strong> ₹{DELIVERY_CHARGE_OUTSIDE_AP}</li>
+                    </ul>
                     <p>
                         Please select your location or enter pincode at checkout to see the exact delivery charge and ETA for your area. Orders with total shipment weight of at least {DELIVERY_FREE_WEIGHT_THRESHOLD_KG}kg get free delivery.
                     </p>
